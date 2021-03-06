@@ -2,7 +2,7 @@ mod config;
 mod probe;
 mod util;
 
-use crate::probe::{ui, App};
+use crate::probe::{ui, App, ZMQInput};
 #[allow(dead_code)]
 use crate::util::event::{Config, Event, Events};
 use config::{Cli, Probes};
@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cli: Cli = argh::from_env();
     let config = fs::read_to_string(cli.config).expect("Something went wrong reading the file");
     let probes: Probes = toml::from_str(&config).unwrap();
-    println!("{:?}", probes);
+    // println!("{:?}", probes);
 
     // set up terminal
     let stdout = io::stdout().into_raw_mode()?;
@@ -26,11 +26,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
+    let inputs = vec![ZMQInput {}];
+
     // set up events and app
-    let events = Events::with_config(Config {
-        tick_rate: Duration::from_millis(cli.tick_rate),
-        ..Config::default()
-    });
+    let events = Events::with_config_and_probes(
+        Config {
+            tick_rate: Duration::from_millis(cli.tick_rate),
+            ..Config::default()
+        },
+        inputs,
+    );
     let mut app = App::new("Probe");
     app.probes = probes.probes;
 
@@ -59,6 +64,9 @@ fn main() -> Result<(), Box<dyn Error>> {
             },
             Event::Tick => {
                 app.on_tick();
+            }
+            Event::Message(msg) => {
+                println!("{}", msg);
             }
         }
         if app.should_quit {
