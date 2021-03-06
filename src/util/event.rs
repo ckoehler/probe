@@ -12,37 +12,33 @@ use termion::input::TermRead;
 
 pub enum Event<I> {
     Input(I),
-    Message(String),
-    Tick,
+    Message(String, String),
 }
 
-/// A small event handler that wrap termion input and tick events. Each event
+/// A small event handler that wrap termion input and message events. Each event
 /// type is handled in its own thread and returned to a common `Receiver`
 pub struct Events {
     rx: mpsc::Receiver<Event<Key>>,
     input_handle: thread::JoinHandle<()>,
     probe_handles: Vec<thread::JoinHandle<()>>,
     ignore_exit_key: Arc<AtomicBool>,
-    tick_handle: thread::JoinHandle<()>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Config {
     pub exit_key: Key,
-    pub tick_rate: Duration,
 }
 
 impl Default for Config {
     fn default() -> Config {
         Config {
             exit_key: Key::Char('q'),
-            tick_rate: Duration::from_millis(250),
         }
     }
 }
 
 impl Events {
-    pub fn with_config_and_probes<T: 'static + ProbeInput + Sync + Copy + Send>(
+    pub fn with_config_and_probes<T: 'static + ProbeInput + Sync + Clone + Send>(
         config: Config,
         pis: Vec<T>,
     ) -> Events {
@@ -66,15 +62,6 @@ impl Events {
                 }
             })
         };
-        let tick_handle = {
-            let tx = tx.clone();
-            thread::spawn(move || loop {
-                if tx.send(Event::Tick).is_err() {
-                    break;
-                }
-                thread::sleep(config.tick_rate);
-            })
-        };
         let mut probe_handles = Vec::new();
         pis.iter().for_each(|p| {
             let p = p.clone();
@@ -83,7 +70,8 @@ impl Events {
                 p.init();
                 loop {
                     let msg = p.get();
-                    if tx.send(Event::Message(msg)).is_err() {
+                    let name = p.name();
+                    if tx.send(Event::Message(name, msg)).is_err() {
                         break;
                     }
                 }
@@ -94,7 +82,6 @@ impl Events {
             rx,
             ignore_exit_key,
             input_handle,
-            tick_handle,
             probe_handles,
         }
     }

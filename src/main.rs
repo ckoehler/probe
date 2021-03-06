@@ -26,16 +26,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let inputs = vec![ZMQInput {}];
+    let inputs = vec![ZMQInput {
+        name: "Probe 1".to_string(),
+    }];
 
     // set up events and app
-    let events = Events::with_config_and_probes(
-        Config {
-            tick_rate: Duration::from_millis(cli.tick_rate),
-            ..Config::default()
-        },
-        inputs,
-    );
+    let events = Events::with_config_and_probes(Config::default(), inputs);
     let mut app = App::new("Probe");
     app.probes = probes.probes;
 
@@ -62,11 +58,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
                 _ => {}
             },
-            Event::Tick => {
-                app.on_tick();
-            }
-            Event::Message(msg) => {
-                println!("{}", msg);
+            Event::Message(name, msg) => {
+                app.process_message_for_stream(name, msg);
             }
         }
         if app.should_quit {

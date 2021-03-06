@@ -5,13 +5,10 @@ use serde::Deserialize;
 #[derive(Debug, FromArgs)]
 pub struct Cli {
     /// time in ms between two ticks.
-    #[argh(option, default = "250")]
+    #[argh(option, default = "1000")]
     pub tick_rate: u64,
-    /// whether unicode symbols are used to improve the overall look of the app
-    #[argh(option, default = "true")]
-    pub enhanced_graphics: bool,
     /// config file.
-    #[argh(option, default = "String::from(\"prober.toml\")")]
+    #[argh(option, default = "String::from(\"probe.toml\")")]
     pub config: String,
 }
 
