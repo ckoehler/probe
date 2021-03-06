@@ -3,8 +3,9 @@ mod probe;
 mod util;
 
 use crate::probe::{ui, App};
+#[allow(dead_code)]
 use crate::util::event::{Config, Event, Events};
-use config::{Cli, Probe, Probes};
+use config::{Cli, Probes};
 
 use std::fs;
 use std::{error::Error, io, time::Duration};

@@ -2,11 +2,9 @@ use crate::config::Probe;
 use crate::probe::App;
 use tui::{
     backend::Backend,
-    layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
-    symbols,
+    layout::{Constraint, Layout, Rect},
+    style::{Color, Style},
     text::{Span, Spans},
-    widgets::canvas::{Canvas, Line, Map, MapResolution, Rectangle},
     widgets::{Block, Borders, Row, Table, Tabs},
     Frame,
 };
