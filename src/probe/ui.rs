@@ -1,3 +1,4 @@
+use crate::config::Probe;
 use crate::probe::App;
 use tui::{
     backend::Backend,
@@ -30,8 +31,8 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     f.render_widget(tabs, chunks[0]);
     match app.tabs.index {
         0 => draw_first_tab(f, app, chunks[1]),
-        1 => draw_second_tab(f, app, chunks[1]),
-        2 => draw_third_tab(f, app, chunks[1]),
+        // 1 => draw_second_tab(f, app, chunks[1]),
+        // 2 => draw_third_tab(f, app, chunks[1]),
         _ => {}
     };
 }
@@ -43,70 +44,56 @@ where
     let chunks = Layout::default()
         .constraints(
             [
-                Constraint::Length(9),
-                Constraint::Min(8),
-                Constraint::Length(7),
+                Constraint::Max(10),
+                Constraint::Max(10),
+                Constraint::Max(10),
             ]
             .as_ref(),
         )
         .split(area);
-    draw_gauges(f, app, chunks[0]);
-    draw_charts(f, app, chunks[1]);
-    draw_text(f, chunks[2]);
+    draw_probe(f, &app.probes[0], chunks[0]);
+    // draw_gauges(f, app, chunks[0]);
+    // draw_charts(f, app, chunks[1]);
+    // draw_text(f, chunks[2]);
 }
 
-fn draw_gauges<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
+fn draw_probe<B>(f: &mut Frame<B>, probe: &Probe, area: Rect)
 where
     B: Backend,
 {
-    let chunks = Layout::default()
-        .constraints(
-            [
-                Constraint::Length(2),
-                Constraint::Length(3),
-                Constraint::Length(1),
-            ]
-            .as_ref(),
-        )
-        .margin(1)
-        .split(area);
-    let block = Block::default().borders(Borders::ALL).title("Graphs");
+    // let chunks = Layout::default()
+    //     .constraints(
+    //         [
+    //             Constraint::Length(2),
+    //             Constraint::Length(3),
+    //             Constraint::Length(1),
+    //         ]
+    //         .as_ref(),
+    //     )
+    //     .margin(1)
+    //     .split(area);
+    let block = Block::default().borders(Borders::ALL).title("Probe 1");
     f.render_widget(block, area);
 
-    let label = format!("{:.2}%", app.progress * 100.0);
-    let gauge = Gauge::default()
-        .block(Block::default().title("Gauge:"))
-        .gauge_style(
-            Style::default()
-                .fg(Color::Magenta)
-                .bg(Color::Black)
-                .add_modifier(Modifier::ITALIC | Modifier::BOLD),
+    let style = Style::default().fg(Color::White);
+    let mut rows: Vec<Row> = probe
+        .filters
+        .iter()
+        .map(|p| Row::new(vec![p.name.to_string(), p.count.to_string()]).style(style))
+        .collect();
+    rows.insert(
+        0,
+        Row::new(vec![String::from("All"), probe.count.to_string()]).style(style),
+    );
+    let table = Table::new(rows)
+        .header(
+            Row::new(vec!["Type", "Count"])
+                .style(Style::default().fg(Color::Yellow))
+                .bottom_margin(1),
         )
-        .label(label)
-        .ratio(app.progress);
-    f.render_widget(gauge, chunks[0]);
-
-    let sparkline = Sparkline::default()
-        .block(Block::default().title("Sparkline:"))
-        .style(Style::default().fg(Color::Green))
-        .data(&app.sparkline.points)
-        .bar_set(if app.enhanced_graphics {
-            symbols::bar::NINE_LEVELS
-        } else {
-            symbols::bar::THREE_LEVELS
-        });
-    f.render_widget(sparkline, chunks[1]);
-
-    let line_gauge = LineGauge::default()
-        .block(Block::default().title("LineGauge:"))
-        .gauge_style(Style::default().fg(Color::Magenta))
-        .line_set(if app.enhanced_graphics {
-            symbols::line::THICK
-        } else {
-            symbols::line::NORMAL
-        })
-        .ratio(app.progress);
-    f.render_widget(line_gauge, chunks[2]);
+        .block(Block::default().title("Events").borders(Borders::ALL))
+        .widths(&[Constraint::Length(10), Constraint::Length(6)]);
+    f.render_widget(table, area);
 }
 
 fn draw_charts<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
@@ -297,84 +284,84 @@ where
     f.render_widget(paragraph, area);
 }
 
-fn draw_second_tab<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
-where
-    B: Backend,
-{
-    let chunks = Layout::default()
-        .constraints([Constraint::Percentage(30), Constraint::Percentage(70)].as_ref())
-        .direction(Direction::Horizontal)
-        .split(area);
-    let up_style = Style::default().fg(Color::Green);
-    let failure_style = Style::default()
-        .fg(Color::Red)
-        .add_modifier(Modifier::RAPID_BLINK | Modifier::CROSSED_OUT);
-    let rows = app.servers.iter().map(|s| {
-        let style = if s.status == "Up" {
-            up_style
-        } else {
-            failure_style
-        };
-        Row::new(vec![s.name, s.location, s.status]).style(style)
-    });
-    let table = Table::new(rows)
-        .header(
-            Row::new(vec!["Server", "Location", "Status"])
-                .style(Style::default().fg(Color::Yellow))
-                .bottom_margin(1),
-        )
-        .block(Block::default().title("Servers").borders(Borders::ALL))
-        .widths(&[
-            Constraint::Length(15),
-            Constraint::Length(15),
-            Constraint::Length(10),
-        ]);
-    f.render_widget(table, chunks[0]);
+// fn draw_second_tab<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
+// where
+//     B: Backend,
+// {
+//     let chunks = Layout::default()
+//         .constraints([Constraint::Percentage(30), Constraint::Percentage(70)].as_ref())
+//         .direction(Direction::Horizontal)
+//         .split(area);
+//     let up_style = Style::default().fg(Color::Green);
+//     let failure_style = Style::default()
+//         .fg(Color::Red)
+//         .add_modifier(Modifier::RAPID_BLINK | Modifier::CROSSED_OUT);
+//     let rows = app.servers.iter().map(|s| {
+//         let style = if s.status == "Up" {
+//             up_style
+//         } else {
+//             failure_style
+//         };
+//         Row::new(vec![s.name, s.location, s.status]).style(style)
+//     });
+//     let table = Table::new(rows)
+//         .header(
+//             Row::new(vec!["Server", "Location", "Status"])
+//                 .style(Style::default().fg(Color::Yellow))
+//                 .bottom_margin(1),
+//         )
+//         .block(Block::default().title("Servers").borders(Borders::ALL))
+//         .widths(&[
+//             Constraint::Length(15),
+//             Constraint::Length(15),
+//             Constraint::Length(10),
+//         ]);
+//     f.render_widget(table, chunks[0]);
 
-    let map = Canvas::default()
-        .block(Block::default().title("World").borders(Borders::ALL))
-        .paint(|ctx| {
-            ctx.draw(&Map {
-                color: Color::White,
-                resolution: MapResolution::High,
-            });
-            ctx.layer();
-            ctx.draw(&Rectangle {
-                x: 0.0,
-                y: 30.0,
-                width: 10.0,
-                height: 10.0,
-                color: Color::Yellow,
-            });
-            for (i, s1) in app.servers.iter().enumerate() {
-                for s2 in &app.servers[i + 1..] {
-                    ctx.draw(&Line {
-                        x1: s1.coords.1,
-                        y1: s1.coords.0,
-                        y2: s2.coords.0,
-                        x2: s2.coords.1,
-                        color: Color::Yellow,
-                    });
-                }
-            }
-            for server in &app.servers {
-                let color = if server.status == "Up" {
-                    Color::Green
-                } else {
-                    Color::Red
-                };
-                ctx.print(server.coords.1, server.coords.0, "X", color);
-            }
-        })
-        .marker(if app.enhanced_graphics {
-            symbols::Marker::Braille
-        } else {
-            symbols::Marker::Dot
-        })
-        .x_bounds([-180.0, 180.0])
-        .y_bounds([-90.0, 90.0]);
-    f.render_widget(map, chunks[1]);
-}
+//     let map = Canvas::default()
+//         .block(Block::default().title("World").borders(Borders::ALL))
+//         .paint(|ctx| {
+//             ctx.draw(&Map {
+//                 color: Color::White,
+//                 resolution: MapResolution::High,
+//             });
+//             ctx.layer();
+//             ctx.draw(&Rectangle {
+//                 x: 0.0,
+//                 y: 30.0,
+//                 width: 10.0,
+//                 height: 10.0,
+//                 color: Color::Yellow,
+//             });
+//             for (i, s1) in app.servers.iter().enumerate() {
+//                 for s2 in &app.servers[i + 1..] {
+//                     ctx.draw(&Line {
+//                         x1: s1.coords.1,
+//                         y1: s1.coords.0,
+//                         y2: s2.coords.0,
+//                         x2: s2.coords.1,
+//                         color: Color::Yellow,
+//                     });
+//                 }
+//             }
+//             for server in &app.servers {
+//                 let color = if server.status == "Up" {
+//                     Color::Green
+//                 } else {
+//                     Color::Red
+//                 };
+//                 ctx.print(server.coords.1, server.coords.0, "X", color);
+//             }
+//         })
+//         .marker(if app.enhanced_graphics {
+//             symbols::Marker::Braille
+//         } else {
+//             symbols::Marker::Dot
+//         })
+//         .x_bounds([-180.0, 180.0])
+//         .y_bounds([-90.0, 90.0]);
+//     f.render_widget(map, chunks[1]);
+// }
 
 fn draw_third_tab<B>(f: &mut Frame<B>, _app: &mut App, area: Rect)
 where

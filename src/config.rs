@@ -21,6 +21,15 @@ pub struct Probes {
 }
 #[derive(Debug, Deserialize)]
 pub struct Probe {
+    pub name: String,
+    pub filters: Vec<Filter>,
     pub address: String,
     pub mode: String,
+    pub count: u32,
+}
+#[derive(Debug, Deserialize)]
+pub struct Filter {
+    pub name: String,
+    pub pattern: String,
+    pub count: u32,
 }

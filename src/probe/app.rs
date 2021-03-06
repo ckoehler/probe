@@ -1,3 +1,4 @@
+use crate::config::Probe;
 use crate::util::{RandomSignal, SinSignal, StatefulList, TabsState};
 
 const TASKS: [&str; 24] = [
@@ -114,7 +115,7 @@ pub struct App<'a> {
     pub logs: StatefulList<(&'a str, &'a str)>,
     pub signals: Signals,
     pub barchart: Vec<(&'a str, u64)>,
-    pub servers: Vec<Server<'a>>,
+    pub probes: Vec<Probe>,
     pub enhanced_graphics: bool,
 }
 
@@ -153,32 +154,7 @@ impl<'a> App<'a> {
                 window: [0.0, 20.0],
             },
             barchart: EVENTS.to_vec(),
-            servers: vec![
-                Server {
-                    name: "NorthAmerica-1",
-                    location: "New York City",
-                    coords: (40.71, -74.00),
-                    status: "Up",
-                },
-                Server {
-                    name: "Europe-1",
-                    location: "Paris",
-                    coords: (48.85, 2.35),
-                    status: "Failure",
-                },
-                Server {
-                    name: "SouthAmerica-1",
-                    location: "São Paulo",
-                    coords: (-23.54, -46.62),
-                    status: "Up",
-                },
-                Server {
-                    name: "Asia-1",
-                    location: "Singapore",
-                    coords: (1.35, 103.86),
-                    status: "Up",
-                },
-            ],
+            probes: vec![],
             enhanced_graphics,
         }
     }

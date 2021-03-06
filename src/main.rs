@@ -17,6 +17,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cli: Cli = argh::from_env();
     let config = fs::read_to_string(cli.config).expect("Something went wrong reading the file");
     let probes: Probes = toml::from_str(&config).unwrap();
+    println!("{:?}", probes);
 
     // set up terminal
     let stdout = io::stdout().into_raw_mode()?;
@@ -31,6 +32,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         ..Config::default()
     });
     let mut app = App::new("Probe", cli.enhanced_graphics);
+    app.probes = probes.probes;
 
     // event loop
     loop {
