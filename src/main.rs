@@ -1,6 +1,5 @@
 mod config;
 mod probe;
-#[allow(dead_code)]
 mod util;
 
 use crate::probe::{ui, App};
@@ -31,7 +30,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         tick_rate: Duration::from_millis(cli.tick_rate),
         ..Config::default()
     });
-    let mut app = App::new("Probe", cli.enhanced_graphics);
+    let mut app = App::new("Probe");
     app.probes = probes.probes;
 
     // event loop
