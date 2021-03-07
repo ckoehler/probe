@@ -1,4 +1,5 @@
-use crate::probe::ProbeInput;
+use crate::config::Probe;
+use crate::probe::ZMQInput;
 use std::sync::mpsc;
 use std::thread;
 
@@ -12,18 +13,18 @@ pub struct Inputs {
 }
 
 impl Inputs {
-    pub fn with_probes<T: 'static + ProbeInput + Sync + Clone + Send>(pis: Vec<T>) -> Inputs {
+    pub fn with_probes(probes: Vec<Probe>) -> Inputs {
         let (tx, rx) = mpsc::channel();
 
         let mut probe_handles = Vec::new();
-        pis.iter().for_each(|p| {
+        probes.iter().for_each(|p| {
             let p = p.clone();
             let tx = tx.clone();
             let h = thread::spawn(move || {
-                p.init();
+                let z = ZMQInput::from_probe(&p);
                 loop {
-                    let msg = p.get();
-                    let name = p.name();
+                    let msg = z.get();
+                    let name = z.name();
                     if tx.send((name, msg)).is_err() {
                         break;
                     }

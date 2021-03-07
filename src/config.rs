@@ -16,7 +16,7 @@ pub struct Cli {
 pub struct Probes {
     pub probes: Vec<Probe>,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Probe {
     pub name: String,
     pub filters: Option<Vec<Filter>>,
@@ -24,7 +24,7 @@ pub struct Probe {
     pub mode: String,
     pub count: u32,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Filter {
     pub name: String,
     pub pattern: String,

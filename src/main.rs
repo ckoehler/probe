@@ -2,7 +2,7 @@ mod config;
 mod probe;
 mod util;
 
-use crate::probe::{input, ui, App, ZMQInput};
+use crate::probe::{input, ui, App};
 #[allow(dead_code)]
 use crate::util::event::{Config, Event, Events};
 use config::{Cli, Probes};
@@ -29,8 +29,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // setup inputs
-    let inputs = ZMQInput::from_probes(&probes.probes);
-    let inputs = input::Inputs::with_probes(inputs);
+    let inputs = input::Inputs::with_probes(probes.probes.clone());
 
     // set up events and app
     let events = Events::with_config_and_probes(Config {
