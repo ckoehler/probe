@@ -1,11 +1,11 @@
-mod config;
 mod probe;
-mod util;
 
-use crate::probe::{input, ui, App};
+use crate::probe::app::App;
+use crate::probe::config::{Cli, Probes};
 #[allow(dead_code)]
-use crate::util::event::{Config, Event, Events};
-use config::{Cli, Probes};
+use crate::probe::event::{Config, Event, Events};
+use crate::probe::inputs::Inputs;
+use crate::probe::ui;
 
 use std::fs;
 use std::sync::{Arc, Mutex};
@@ -29,7 +29,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // setup inputs
-    let inputs = input::Inputs::with_probes(probes.probes.clone());
+    let inputs = Inputs::with_probes(probes.probes.clone());
 
     // set up events and app
     let events = Events::with_config_and_probes(Config {

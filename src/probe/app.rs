@@ -1,5 +1,5 @@
-use crate::config::Probe;
-use crate::util::TabsState;
+use crate::probe::config::Probe;
+use crate::probe::state::TabsState;
 
 pub struct App<'a> {
     pub title: &'a str,

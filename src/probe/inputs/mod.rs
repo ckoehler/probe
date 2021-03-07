@@ -1,5 +1,6 @@
-use crate::config::Probe;
-use crate::probe::ZMQInput;
+mod zmq;
+use crate::probe::config::Probe;
+use crate::probe::inputs::zmq::ZMQInput;
 use std::sync::mpsc;
 use std::thread;
 

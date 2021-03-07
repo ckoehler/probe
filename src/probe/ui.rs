@@ -1,5 +1,5 @@
-use crate::config::Probe;
-use crate::probe::App;
+use crate::probe::app::App;
+use crate::probe::config::Probe;
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},
