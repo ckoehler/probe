@@ -37,8 +37,10 @@ where
     B: Backend,
 {
     let num_probes = app.probes.len();
+    // build one more chunk than needed for whitespace
     let constraints: Vec<Constraint> = (0..num_probes + 1).map(|_c| Constraint::Max(10)).collect();
     let chunks = Layout::default().constraints(constraints).split(area);
+    // for each probe, draw it in a chunk
     app.probes.iter().enumerate().for_each(|(i, p)| {
         draw_probe(f, &p, chunks[i]);
     });
@@ -48,23 +50,13 @@ fn draw_probe<B>(f: &mut Frame<B>, probe: &Probe, area: Rect)
 where
     B: Backend,
 {
-    // let chunks = Layout::default()
-    //     .constraints(
-    //         [
-    //             Constraint::Length(2),
-    //             Constraint::Length(3),
-    //             Constraint::Length(1),
-    //         ]
-    //         .as_ref(),
-    //     )
-    //     .margin(1)
-    //     .split(area);
     let block = Block::default()
         .borders(Borders::ALL)
         .title(probe.name.clone());
     f.render_widget(block, area);
 
     let style = Style::default().fg(Color::White);
+    // Build all the rows from filters
     let mut rows = match &probe.filters {
         Some(filters) => filters
             .iter()
@@ -72,11 +64,8 @@ where
             .collect(),
         None => Vec::new(),
     };
-    // let mut rows: Vec<Row> = probe
-    //     .filters
-    //     .iter()
-    //     .map(|p| Row::new(vec![p.name.to_string(), p.count.to_string()]).style(style))
-    //     .collect();
+
+    // Add a row for all messages at the front
     rows.insert(
         0,
         Row::new(vec![String::from("All"), probe.count.to_string()]).style(style),
