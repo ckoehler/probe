@@ -28,10 +28,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let inputs = vec![ZMQInput {
-        name: "Probe 1".to_string(),
-    }];
-
+    // setup inputs
+    let inputs = ZMQInput::from_probes(&probes.probes);
     let inputs = input::Inputs::with_probes(inputs);
 
     // set up events and app

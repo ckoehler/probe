@@ -1,4 +1,3 @@
-extern crate tokio;
 use rand::Rng;
 use std::time::Duration;
 
