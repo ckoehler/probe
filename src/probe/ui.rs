@@ -68,11 +68,18 @@ where
     f.render_widget(block, area);
 
     let style = Style::default().fg(Color::White);
-    let mut rows: Vec<Row> = probe
-        .filters
-        .iter()
-        .map(|p| Row::new(vec![p.name.to_string(), p.count.to_string()]).style(style))
-        .collect();
+    let mut rows = match &probe.filters {
+        Some(filters) => filters
+            .iter()
+            .map(|p| Row::new(vec![p.name.to_string(), p.count.to_string()]).style(style))
+            .collect(),
+        None => Vec::new(),
+    };
+    // let mut rows: Vec<Row> = probe
+    //     .filters
+    //     .iter()
+    //     .map(|p| Row::new(vec![p.name.to_string(), p.count.to_string()]).style(style))
+    //     .collect();
     rows.insert(
         0,
         Row::new(vec![String::from("All"), probe.count.to_string()]).style(style),
@@ -83,7 +90,11 @@ where
                 .style(Style::default().fg(Color::Yellow))
                 .bottom_margin(1),
         )
-        .block(Block::default().title("Events").borders(Borders::ALL))
+        .block(
+            Block::default()
+                .title(probe.name.clone())
+                .borders(Borders::ALL),
+        )
         .widths(&[Constraint::Length(10), Constraint::Length(6)]);
     f.render_widget(table, area);
 }

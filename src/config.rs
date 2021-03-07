@@ -19,7 +19,7 @@ pub struct Probes {
 #[derive(Debug, Deserialize)]
 pub struct Probe {
     pub name: String,
-    pub filters: Vec<Filter>,
+    pub filters: Option<Vec<Filter>>,
     pub address: String,
     pub mode: String,
     pub count: u32,
