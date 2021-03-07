@@ -1,20 +1,19 @@
-use crate::probe::config::Probe;
-use crate::probe::state::TabsState;
+use crate::probe::state::{AppState, ProbeState, TabsState};
 
 pub struct App<'a> {
     pub title: &'a str,
     pub should_quit: bool,
     pub tabs: TabsState<'a>,
-    pub probes: Vec<Probe>,
+    pub state: AppState,
 }
 
 impl<'a> App<'a> {
-    pub fn new(title: &'a str, probes: Vec<Probe>) -> App<'a> {
+    pub fn new(title: &'a str, state: AppState) -> App<'a> {
         App {
             title,
             should_quit: false,
             tabs: TabsState::new(vec!["Tab0", "Tab1", "Tab2"]),
-            probes: probes,
+            state: state,
         }
     }
 
@@ -44,9 +43,10 @@ impl<'a> App<'a> {
     }
 
     pub fn process_message_for_stream(&mut self, name: String, msg: String) {
-        self.probes
+        self.state
+            .probes
             .iter_mut()
             .filter(|p| p.name == name)
-            .for_each(|p: &mut Probe| p.count += 1);
+            .for_each(|p: &mut ProbeState| p.count += 1);
     }
 }

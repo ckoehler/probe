@@ -1,5 +1,5 @@
 use crate::probe::app::App;
-use crate::probe::config::Probe;
+use crate::probe::state::ProbeState;
 use tui::{
     backend::Backend,
     layout::{Constraint, Layout, Rect},
@@ -36,16 +36,16 @@ fn draw_first_tab<B>(f: &mut Frame<B>, app: &App, area: Rect)
 where
     B: Backend,
 {
-    let num_probes = app.probes.len();
+    let num_probes = app.state.probes.len();
     let constraints: Vec<Constraint> = (0..num_probes).map(|_c| Constraint::Min(5)).collect();
     let chunks = Layout::default().constraints(constraints).split(area);
     // for each probe, draw it in a chunk
-    app.probes.iter().enumerate().for_each(|(i, p)| {
+    app.state.probes.iter().enumerate().for_each(|(i, p)| {
         draw_probe(f, &p, chunks[i]);
     });
 }
 
-fn draw_probe<B>(f: &mut Frame<B>, probe: &Probe, area: Rect)
+fn draw_probe<B>(f: &mut Frame<B>, probe: &ProbeState, area: Rect)
 where
     B: Backend,
 {
@@ -56,13 +56,11 @@ where
 
     let style = Style::default().fg(Color::White);
     // Build all the rows from filters
-    let mut rows = match &probe.filters {
-        Some(filters) => filters
-            .iter()
-            .map(|p| Row::new(vec![p.name.to_string(), "0".to_string()]).style(style))
-            .collect(),
-        None => Vec::new(),
-    };
+    let mut rows: Vec<Row> = probe
+        .filters
+        .iter()
+        .map(|p| Row::new(vec![p.name.to_string(), "0".to_string()]).style(style))
+        .collect();
 
     // Add a row for all messages at the front
     rows.insert(

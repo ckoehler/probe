@@ -5,6 +5,7 @@ use crate::probe::config::{Cli, Probes};
 #[allow(dead_code)]
 use crate::probe::event::{Config, Event, Events};
 use crate::probe::inputs::Inputs;
+use crate::probe::state::AppState;
 use crate::probe::ui;
 
 use std::fs;
@@ -36,7 +37,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         tick_rate: Duration::from_millis(cli.tick_rate),
         ..Config::default()
     });
-    let app = App::new("Probe", probes.probes);
+    let appstate = AppState::from_probes(probes.probes);
+    let app = App::new("Probe", appstate);
     let app = Arc::new(Mutex::new(app));
 
     // input loop

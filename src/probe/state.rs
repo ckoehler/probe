@@ -1,3 +1,5 @@
+use crate::probe::config;
+
 pub struct TabsState<'a> {
     pub titles: Vec<&'a str>,
     pub index: usize,
@@ -16,6 +18,35 @@ impl<'a> TabsState<'a> {
             self.index -= 1;
         } else {
             self.index = self.titles.len() - 1;
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct AppState {
+    pub probes: Vec<ProbeState>,
+}
+#[derive(Clone, Debug)]
+pub struct ProbeState {
+    pub name: String,
+    pub filters: Vec<config::Filter>,
+    pub count: u32,
+}
+
+impl AppState {
+    pub fn from_probes(p: Vec<config::Probe>) -> AppState {
+        AppState {
+            probes: p.iter().map(|i| ProbeState::from(i.clone())).collect(),
+        }
+    }
+}
+
+impl From<config::Probe> for ProbeState {
+    fn from(item: config::Probe) -> Self {
+        ProbeState {
+            name: item.name,
+            filters: item.filters.unwrap_or(vec![]),
+            count: 0,
         }
     }
 }
