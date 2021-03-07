@@ -9,12 +9,12 @@ pub struct App<'a> {
 }
 
 impl<'a> App<'a> {
-    pub fn new(title: &'a str) -> App<'a> {
+    pub fn new(title: &'a str, probes: Vec<Probe>) -> App<'a> {
         App {
             title,
             should_quit: false,
             tabs: TabsState::new(vec!["Tab0", "Tab1", "Tab2"]),
-            probes: vec![],
+            probes: probes,
         }
     }
 

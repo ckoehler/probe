@@ -2,12 +2,14 @@ mod config;
 mod probe;
 mod util;
 
-use crate::probe::{ui, App, ZMQInput};
+use crate::probe::{input, ui, App, ZMQInput};
 #[allow(dead_code)]
 use crate::util::event::{Config, Event, Events};
 use config::{Cli, Probes};
 
 use std::fs;
+use std::sync::Mutex;
+use std::thread;
 use std::{error::Error, io, time::Duration};
 use termion::{event::Key, input::MouseTerminal, raw::IntoRawMode, screen::AlternateScreen};
 use tui::{backend::TermionBackend, Terminal};
@@ -30,47 +32,65 @@ fn main() -> Result<(), Box<dyn Error>> {
         name: "Probe 1".to_string(),
     }];
 
+    let inputs = input::Inputs::with_probes(inputs);
+
     // set up events and app
-    let events = Events::with_config_and_probes(
-        Config {
-            tick_rate: Duration::from_millis(cli.tick_rate),
-            ..Config::default()
-        },
-        inputs,
-    );
-    let mut app = App::new("Probe");
-    app.probes = probes.probes;
+    let events = Events::with_config_and_probes(Config {
+        tick_rate: Duration::from_millis(cli.tick_rate),
+        ..Config::default()
+    });
+    let app = App::new("Probe", probes.probes);
+    let app = Mutex::new(app);
+
+    // input loop
+    thread::spawn(move || loop {
+        match inputs.next() {
+            msg => {
+                let msg = msg.unwrap();
+                let mut app = app.lock().unwrap();
+                println!("Got message: {:?}", msg);
+                app.process_message_for_stream(msg.0, msg.1);
+            }
+        }
+    });
 
     // event loop
     loop {
-        terminal.draw(|f| ui::draw(f, &mut app))?;
+        {
+            let app = app.lock().unwrap();
+            terminal.draw(|f| ui::draw(f, &app))?;
+        }
 
         match events.next()? {
             Event::Input(key) => match key {
                 Key::Char(c) => {
+                    let mut app = app.lock().unwrap();
                     app.on_key(c);
                 }
                 Key::Up => {
+                    let mut app = app.lock().unwrap();
                     app.on_up();
                 }
                 Key::Down => {
+                    let mut app = app.lock().unwrap();
                     app.on_down();
                 }
                 Key::Left => {
+                    let mut app = app.lock().unwrap();
                     app.on_left();
                 }
                 Key::Right => {
+                    let mut app = app.lock().unwrap();
                     app.on_right();
                 }
                 _ => {}
             },
             Event::Tick => {
+                let mut app = app.lock().unwrap();
                 app.on_tick();
             }
-            Event::Message(name, msg) => {
-                app.process_message_for_stream(name, msg);
-            }
         }
+        let app = app.lock().unwrap();
         if app.should_quit {
             break;
         }

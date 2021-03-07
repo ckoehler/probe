@@ -9,7 +9,7 @@ use tui::{
     Frame,
 };
 
-pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
+pub fn draw<B: Backend>(f: &mut Frame<B>, app: &App) {
     let chunks = Layout::default()
         .constraints([Constraint::Length(3), Constraint::Min(0)].as_ref())
         .split(f.size());
@@ -32,7 +32,7 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     };
 }
 
-fn draw_first_tab<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
+fn draw_first_tab<B>(f: &mut Frame<B>, app: &App, area: Rect)
 where
     B: Backend,
 {

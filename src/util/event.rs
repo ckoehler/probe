@@ -1,4 +1,3 @@
-use crate::probe::ProbeInput;
 use std::io;
 use std::sync::mpsc;
 use std::sync::{
@@ -12,7 +11,6 @@ use termion::input::TermRead;
 
 pub enum Event<I> {
     Input(I),
-    Message(String, String),
     Tick,
 }
 
@@ -21,7 +19,6 @@ pub enum Event<I> {
 pub struct Events {
     rx: mpsc::Receiver<Event<Key>>,
     input_handle: thread::JoinHandle<()>,
-    probe_handles: Vec<thread::JoinHandle<()>>,
     ignore_exit_key: Arc<AtomicBool>,
     tick_handle: thread::JoinHandle<()>,
 }
@@ -42,10 +39,7 @@ impl Default for Config {
 }
 
 impl Events {
-    pub fn with_config_and_probes<T: 'static + ProbeInput + Sync + Clone + Send>(
-        config: Config,
-        pis: Vec<T>,
-    ) -> Events {
+    pub fn with_config_and_probes(config: Config) -> Events {
         let (tx, rx) = mpsc::channel();
         let ignore_exit_key = Arc::new(AtomicBool::new(false));
         let input_handle = {
@@ -75,28 +69,11 @@ impl Events {
                 thread::sleep(config.tick_rate);
             })
         };
-        let mut probe_handles = Vec::new();
-        pis.iter().for_each(|p| {
-            let p = p.clone();
-            let tx = tx.clone();
-            let h = thread::spawn(move || {
-                p.init();
-                loop {
-                    let msg = p.get();
-                    let name = p.name();
-                    if tx.send(Event::Message(name, msg)).is_err() {
-                        break;
-                    }
-                }
-            });
-            probe_handles.push(h);
-        });
         Events {
             rx,
             ignore_exit_key,
             input_handle,
             tick_handle,
-            probe_handles,
         }
     }
 
