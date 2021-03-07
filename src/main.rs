@@ -31,7 +31,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     }];
 
     // set up events and app
-    let events = Events::with_config_and_probes(Config::default(), inputs);
+    let events = Events::with_config_and_probes(
+        Config {
+            tick_rate: Duration::from_millis(cli.tick_rate),
+            ..Config::default()
+        },
+        inputs,
+    );
     let mut app = App::new("Probe");
     app.probes = probes.probes;
 
@@ -58,6 +64,9 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
                 _ => {}
             },
+            Event::Tick => {
+                app.on_tick();
+            }
             Event::Message(name, msg) => {
                 app.process_message_for_stream(name, msg);
             }

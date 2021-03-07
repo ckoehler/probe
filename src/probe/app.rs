@@ -39,6 +39,10 @@ impl<'a> App<'a> {
         }
     }
 
+    pub fn on_tick(&mut self) {
+        // self.probes[0].count += 1;
+    }
+
     pub fn process_message_for_stream(&mut self, name: String, msg: String) {
         self.probes
             .iter_mut()
