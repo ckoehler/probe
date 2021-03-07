@@ -8,7 +8,7 @@ use crate::util::event::{Config, Event, Events};
 use config::{Cli, Probes};
 
 use std::fs;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::{error::Error, io, time::Duration};
 use termion::{event::Key, input::MouseTerminal, raw::IntoRawMode, screen::AlternateScreen};
@@ -40,15 +40,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         ..Config::default()
     });
     let app = App::new("Probe", probes.probes);
-    let app = Mutex::new(app);
+    let app = Arc::new(Mutex::new(app));
 
     // input loop
+    let tapp = Arc::clone(&app);
     thread::spawn(move || loop {
         match inputs.next() {
             msg => {
                 let msg = msg.unwrap();
-                let mut app = app.lock().unwrap();
-                println!("Got message: {:?}", msg);
+                let mut app = tapp.lock().unwrap();
                 app.process_message_for_stream(msg.0, msg.1);
             }
         }
