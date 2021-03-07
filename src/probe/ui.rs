@@ -37,8 +37,7 @@ where
     B: Backend,
 {
     let num_probes = app.probes.len();
-    // build one more chunk than needed for whitespace
-    let constraints: Vec<Constraint> = (0..num_probes + 1).map(|_c| Constraint::Max(10)).collect();
+    let constraints: Vec<Constraint> = (0..num_probes).map(|_c| Constraint::Min(5)).collect();
     let chunks = Layout::default().constraints(constraints).split(area);
     // for each probe, draw it in a chunk
     app.probes.iter().enumerate().for_each(|(i, p)| {
