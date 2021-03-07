@@ -36,17 +36,12 @@ fn draw_first_tab<B>(f: &mut Frame<B>, app: &App, area: Rect)
 where
     B: Backend,
 {
-    let chunks = Layout::default()
-        .constraints(
-            [
-                Constraint::Max(10),
-                Constraint::Max(10),
-                Constraint::Max(10),
-            ]
-            .as_ref(),
-        )
-        .split(area);
-    draw_probe(f, &app.probes[0], chunks[0]);
+    let num_probes = app.probes.len();
+    let constraints: Vec<Constraint> = (0..num_probes + 1).map(|_c| Constraint::Max(10)).collect();
+    let chunks = Layout::default().constraints(constraints).split(area);
+    app.probes.iter().enumerate().for_each(|(i, p)| {
+        draw_probe(f, &p, chunks[i]);
+    });
 }
 
 fn draw_probe<B>(f: &mut Frame<B>, probe: &Probe, area: Rect)
@@ -64,14 +59,16 @@ where
     //     )
     //     .margin(1)
     //     .split(area);
-    let block = Block::default().borders(Borders::ALL).title("Probe 1");
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .title(probe.name.clone());
     f.render_widget(block, area);
 
     let style = Style::default().fg(Color::White);
     let mut rows = match &probe.filters {
         Some(filters) => filters
             .iter()
-            .map(|p| Row::new(vec![p.name.to_string(), p.count.to_string()]).style(style))
+            .map(|p| Row::new(vec![p.name.to_string(), "0".to_string()]).style(style))
             .collect(),
         None => Vec::new(),
     };

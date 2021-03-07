@@ -2,12 +2,17 @@
 address = "127.0.0.1:5556"
 mode = "zmq"
 name = "Probe 1"
-count = 3
+count = 0
 #[[probes.filters]]
 #name = "Foo"
 #pattern = "123"
-#count = 8
+#count = 0
 #[[probes.filters]]
 #name = "Bar"
 #pattern = "456"
-#count = 7
+#count = 0
+[[probes]]
+address = "127.0.0.1:5556"
+mode = "zmq"
+name = "Probe 2"
+count = 0
