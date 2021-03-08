@@ -2,10 +2,10 @@ use crate::probe::app::App;
 use crate::probe::state::ProbeState;
 use tui::{
     backend::Backend,
-    layout::{Constraint, Layout, Rect},
+    layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
     text::{Span, Spans},
-    widgets::{Block, Borders, Row, Table, Tabs},
+    widgets::{Block, Borders, Row, Sparkline, Table, Tabs},
     Frame,
 };
 
@@ -36,9 +36,11 @@ fn draw_first_tab<B>(f: &mut Frame<B>, app: &App, area: Rect)
 where
     B: Backend,
 {
+    // create blocks for each probe
     let num_probes = app.state.probes.len();
     let constraints: Vec<Constraint> = (0..num_probes).map(|_c| Constraint::Min(5)).collect();
     let chunks = Layout::default().constraints(constraints).split(area);
+
     // for each probe, draw it in a chunk
     app.state.probes.iter().enumerate().for_each(|(i, p)| {
         draw_probe(f, &p, chunks[i]);
@@ -52,7 +54,13 @@ where
     let block = Block::default()
         .borders(Borders::ALL)
         .title(probe.name.clone());
-    f.render_widget(block, area);
+    // f.render_widget(block, area);
+
+    // split the area in two: left for the table, right for the histogram
+    let chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Length(20), Constraint::Min(60)].as_ref())
+        .split(area);
 
     let style = Style::default().fg(Color::White);
     // Build all the rows from filters
@@ -79,5 +87,13 @@ where
                 .borders(Borders::ALL),
         )
         .widths(&[Constraint::Length(10), Constraint::Length(6)]);
-    f.render_widget(table, area);
+    f.render_widget(table, chunks[0]);
+
+    // fill the histogram
+    let data = probe.histogram();
+    let sparkline = Sparkline::default()
+        .style(Style::default().fg(Color::Green))
+        .data(&data[..])
+        .bar_set(tui::symbols::bar::THREE_LEVELS);
+    f.render_widget(sparkline, chunks[1]);
 }

@@ -1,4 +1,5 @@
 use crate::probe::config;
+use std::collections::VecDeque;
 
 pub struct TabsState<'a> {
     pub titles: Vec<&'a str>,
@@ -31,6 +32,8 @@ pub struct ProbeState {
     pub name: String,
     pub filters: Vec<config::Filter>,
     pub count: u32,
+    ring: VecDeque<u64>,
+    ring_buffer: u64,
 }
 
 impl AppState {
@@ -41,12 +44,31 @@ impl AppState {
     }
 }
 
+impl ProbeState {
+    pub fn process_message(&mut self, msg: &String) {
+        self.count += 1;
+        self.ring_buffer += 1;
+    }
+
+    // this is called once per tick, so do display related stuff here.
+    pub fn update_state(&mut self) {
+        self.ring.push_back(self.ring_buffer);
+        self.ring_buffer = 0;
+    }
+
+    pub fn histogram(&self) -> Vec<u64> {
+        self.ring.clone().make_contiguous().to_vec()
+    }
+}
+
 impl From<config::Probe> for ProbeState {
     fn from(item: config::Probe) -> Self {
         ProbeState {
             name: item.name,
             filters: item.filters.unwrap_or(vec![]),
             count: 0,
+            ring_buffer: 0,
+            ring: VecDeque::with_capacity(60),
         }
     }
 }

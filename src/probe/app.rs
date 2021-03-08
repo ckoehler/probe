@@ -39,14 +39,17 @@ impl<'a> App<'a> {
     }
 
     pub fn on_tick(&mut self) {
-        // self.probes[0].count += 1;
-    }
-
-    pub fn process_message_for_stream(&mut self, name: String, msg: String) {
         self.state
             .probes
             .iter_mut()
-            .filter(|p| p.name == name)
-            .for_each(|p: &mut ProbeState| p.count += 1);
+            .for_each(|p: &mut ProbeState| p.update_state());
+    }
+
+    pub fn process_message_for_stream(&mut self, stream: String, msg: String) {
+        self.state
+            .probes
+            .iter_mut()
+            .filter(|p| p.name == stream)
+            .for_each(|p: &mut ProbeState| p.process_message(&msg));
     }
 }
