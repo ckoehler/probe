@@ -38,11 +38,13 @@ where
 {
     // create blocks for each probe
     let num_probes = app.state.probes.len();
-    let constraints: Vec<Constraint> = (0..num_probes).map(|_c| Constraint::Min(5)).collect();
+    let constraints: Vec<Constraint> = (0..num_probes).map(|_c| Constraint::Min(7)).collect();
     let chunks = Layout::default().constraints(constraints).split(area);
 
     // for each probe, draw it in a chunk
     app.state.probes.iter().enumerate().for_each(|(i, p)| {
+        let block = Block::default().borders(Borders::ALL).title(p.name.clone());
+        f.render_widget(block, chunks[i]);
         draw_probe(f, &p, chunks[i]);
     });
 }
@@ -51,15 +53,16 @@ fn draw_probe<B>(f: &mut Frame<B>, probe: &ProbeState, area: Rect)
 where
     B: Backend,
 {
-    let block = Block::default()
-        .borders(Borders::ALL)
-        .title(probe.name.clone());
+    // let block = Block::default()
+    //     .borders(Borders::ALL)
+    //     .title(probe.name.clone());
     // f.render_widget(block, area);
 
     // split the area in two: left for the table, right for the histogram
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([Constraint::Length(20), Constraint::Min(60)].as_ref())
+        .constraints([Constraint::Length(20), Constraint::Min(62)].as_ref())
+        .margin(1)
         .split(area);
 
     let style = Style::default().fg(Color::White);
@@ -81,17 +84,17 @@ where
                 .style(Style::default().fg(Color::Yellow))
                 .bottom_margin(1),
         )
-        .block(
-            Block::default()
-                .title(probe.name.clone())
-                .borders(Borders::ALL),
-        )
         .widths(&[Constraint::Length(10), Constraint::Length(6)]);
     f.render_widget(table, chunks[0]);
 
     // fill the histogram
     let data = probe.histogram();
     let sparkline = Sparkline::default()
+        .block(
+            Block::default()
+                .title("Histogram")
+                .style(Style::default().fg(Color::Yellow)),
+        )
         .style(Style::default().fg(Color::Green))
         .data(&data[..])
         .bar_set(tui::symbols::bar::THREE_LEVELS);

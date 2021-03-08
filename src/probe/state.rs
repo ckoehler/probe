@@ -52,7 +52,10 @@ impl ProbeState {
 
     // this is called once per tick, so do display related stuff here.
     pub fn update_state(&mut self) {
-        self.ring.push_back(self.ring_buffer);
+        self.ring.push_front(self.ring_buffer);
+        if self.ring.len() >= 120 {
+            self.ring.pop_back();
+        }
         self.ring_buffer = 0;
     }
 

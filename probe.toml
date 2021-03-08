@@ -17,7 +17,7 @@ mode = "zmq"
 name = "Probe 2"
 count = 0
 [[probes]]
-address = "tcp://127.0.0.1:5556"
+address = "tcp://127.0.0.1:5558"
 mode = "zmq"
 name = "Probe 3"
 count = 0
@@ -32,7 +32,7 @@ mode = "zmq"
 name = "Probe 5"
 count = 0
 [[probes]]
-address = "tcp://127.0.0.1:5556"
+address = "tcp://127.0.0.1:5555"
 mode = "zmq"
 name = "Probe 6"
 count = 0

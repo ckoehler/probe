@@ -17,6 +17,7 @@ fn main() {
         let relhumidity = rng.gen_range(10, 60);
         let msg = format!("{} {} {}", zipcode, temperature, relhumidity);
         socket.send(&msg, 0).unwrap();
-        std::thread::sleep(Duration::from_millis(300));
+        let delay = rng.gen_range(25, 2200);
+        std::thread::sleep(Duration::from_millis(delay));
     }
 }
