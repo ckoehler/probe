@@ -1,4 +1,5 @@
 use crate::probe::config::Probe;
+use std::str;
 
 pub struct ZMQInput {
     pub name: String,
@@ -20,11 +21,11 @@ impl ZMQInput {
 
     pub fn get(&self) -> String {
         self.socket
-            .recv_msg(0)
+            .recv_multipart(0)
             .unwrap()
-            .as_str()
-            .unwrap()
-            .to_string()
+            .iter()
+            .map(|v| str::from_utf8(v).unwrap_or(""))
+            .collect()
     }
 
     pub fn name(&self) -> String {

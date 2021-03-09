@@ -38,7 +38,7 @@ where
 {
     // create blocks for each probe
     let num_probes = app.state.probes.len();
-    let constraints: Vec<Constraint> = (0..num_probes).map(|_c| Constraint::Min(7)).collect();
+    let constraints: Vec<Constraint> = (0..num_probes).map(|_c| Constraint::Length(5)).collect();
     let chunks = Layout::default().constraints(constraints).split(area);
 
     // for each probe, draw it in a chunk
@@ -76,7 +76,7 @@ where
     // Add a row for all messages at the front
     rows.insert(
         0,
-        Row::new(vec![String::from("All"), probe.count.to_string()]).style(style),
+        Row::new(vec![String::from("*"), probe.count.to_string()]).style(style),
     );
     let table = Table::new(rows)
         .header(
@@ -84,7 +84,7 @@ where
                 .style(Style::default().fg(Color::Yellow))
                 .bottom_margin(1),
         )
-        .widths(&[Constraint::Length(10), Constraint::Length(6)]);
+        .widths(&[Constraint::Length(8), Constraint::Length(6)]);
     f.render_widget(table, chunks[0]);
 
     // fill the histogram
