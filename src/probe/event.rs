@@ -39,7 +39,7 @@ impl Default for Config {
 }
 
 impl Events {
-    pub fn with_config_and_probes(config: Config) -> Events {
+    pub fn with_config(config: Config) -> Events {
         let (tx, rx) = mpsc::channel();
         let ignore_exit_key = Arc::new(AtomicBool::new(false));
         let input_handle = {

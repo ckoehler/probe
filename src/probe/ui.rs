@@ -53,11 +53,6 @@ fn draw_probe<B>(f: &mut Frame<B>, probe: &ProbeState, area: Rect)
 where
     B: Backend,
 {
-    // let block = Block::default()
-    //     .borders(Borders::ALL)
-    //     .title(probe.name.clone());
-    // f.render_widget(block, area);
-
     // split the area in two: left for the table, right for the histogram
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
@@ -66,21 +61,12 @@ where
         .split(area);
 
     let style = Style::default().fg(Color::White);
-    // Build all the rows from filters
-    let mut rows: Vec<Row> = probe
-        .filters
-        .iter()
-        .map(|p| Row::new(vec![p.name.to_string(), "0".to_string()]).style(style))
-        .collect();
 
-    // Add a row for all messages at the front
-    rows.insert(
-        0,
-        Row::new(vec![String::from("*"), probe.count.to_string()]).style(style),
-    );
+    let mut rows = Vec::new();
+    rows.push(Row::new(vec![probe.filter.clone(), probe.count.to_string()]).style(style));
     let table = Table::new(rows)
         .header(
-            Row::new(vec!["Type", "Count"])
+            Row::new(vec!["Match", "Count"])
                 .style(Style::default().fg(Color::Yellow))
                 .bottom_margin(1),
         )

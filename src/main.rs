@@ -20,6 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cli: Cli = argh::from_env();
     let config = fs::read_to_string(cli.config).expect("Something went wrong reading the file");
     let probes: Probes = toml::from_str(&config).unwrap();
+    probes.validate();
     // println!("{:?}", probes);
 
     // set up terminal
@@ -33,7 +34,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let inputs = Inputs::with_probes(probes.probes.clone());
 
     // set up events and app
-    let events = Events::with_config_and_probes(Config {
+    let events = Events::with_config(Config {
         tick_rate: Duration::from_millis(cli.tick_rate),
         ..Config::default()
     });

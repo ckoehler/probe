@@ -10,15 +10,18 @@ name = "Probe 1"
 [[probes]]
 address = "tcp://127.0.0.1:5556"
 name = "Probe 2"
+filter = "2"
 [[probes]]
 address = "tcp://127.0.0.1:5558"
 name = "Probe 3"
 [[probes]]
 address = "tcp://127.0.0.1:5556"
 name = "Probe 4"
+filter = "3"
 [[probes]]
 address = "tcp://127.0.0.1:5556"
 name = "Probe 5"
+filter = "4"
 [[probes]]
 address = "tcp://127.0.0.1:5555"
 name = "Probe 6"

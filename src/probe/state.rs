@@ -1,4 +1,5 @@
 use crate::probe::config;
+use regex::Regex;
 use std::collections::VecDeque;
 
 pub struct TabsState<'a> {
@@ -30,7 +31,7 @@ pub struct AppState {
 #[derive(Clone, Debug)]
 pub struct ProbeState {
     pub name: String,
-    pub filters: Vec<config::Filter>,
+    pub filter: String,
     pub count: u32,
     ring: VecDeque<u64>,
     ring_buffer: u64,
@@ -46,14 +47,19 @@ impl AppState {
 
 impl ProbeState {
     pub fn process_message(&mut self, msg: &String) {
-        self.count += 1;
-        self.ring_buffer += 1;
+        if self.filter != "" {
+            let re = Regex::new(&self.filter).unwrap();
+            if re.is_match(msg) {
+                self.count += 1;
+                self.ring_buffer += 1;
+            }
+        }
     }
 
     // this is called once per tick, so do display related stuff here.
     pub fn update_state(&mut self) {
         self.ring.push_front(self.ring_buffer);
-        if self.ring.len() >= 120 {
+        if self.ring.len() >= 180 {
             self.ring.pop_back();
         }
         self.ring_buffer = 0;
@@ -68,7 +74,7 @@ impl From<config::Probe> for ProbeState {
     fn from(item: config::Probe) -> Self {
         ProbeState {
             name: item.name,
-            filters: item.filters.unwrap_or(vec![]),
+            filter: item.filter.unwrap_or(".*".to_string()),
             count: 0,
             ring_buffer: 0,
             ring: VecDeque::with_capacity(60),

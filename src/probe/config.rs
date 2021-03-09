@@ -1,4 +1,6 @@
 use argh::FromArgs;
+use itertools::Itertools;
+use regex::Regex;
 use serde::Deserialize;
 
 /// Probe Config
@@ -19,12 +21,25 @@ pub struct Probes {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Probe {
     pub name: String,
-    pub filters: Option<Vec<Filter>>,
+    pub filter: Option<String>,
     pub address: String,
 }
-#[derive(Clone, Debug, Deserialize)]
-pub struct Filter {
-    pub name: String,
-    pub pattern: String,
-    pub count: u32,
+
+impl Probes {
+    pub fn validate(&self) {
+        self.probes.iter().for_each(|p| p.validate());
+
+        // make sure all probe names are unique
+        let p: Vec<&String> = self.probes.iter().map(|p| &p.name).unique().collect();
+        assert!(
+            p.len() == self.probes.len(),
+            "Make sure Probe names are unique."
+        );
+    }
+}
+impl Probe {
+    fn validate(&self) {
+        // make sure Filter is a valid regex
+        Regex::new(self.filter.as_ref().unwrap_or(&".*".to_string())).unwrap();
+    }
 }
