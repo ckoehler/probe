@@ -21,8 +21,6 @@ pub struct Probe {
     pub name: String,
     pub filters: Option<Vec<Filter>>,
     pub address: String,
-    pub mode: String,
-    pub count: u32,
 }
 #[derive(Clone, Debug, Deserialize)]
 pub struct Filter {
