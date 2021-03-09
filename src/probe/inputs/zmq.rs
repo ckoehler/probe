@@ -25,7 +25,8 @@ impl ZMQInput {
             .unwrap()
             .iter()
             .map(|v| str::from_utf8(v).unwrap_or(""))
-            .collect()
+            .collect::<Vec<&str>>()
+            .join("\n")
     }
 
     pub fn name(&self) -> String {
