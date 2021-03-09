@@ -2,7 +2,6 @@ mod probe;
 
 use crate::probe::app::App;
 use crate::probe::config::{Cli, Probes};
-#[allow(dead_code)]
 use crate::probe::event::{Config, Event, Events};
 use crate::probe::inputs::Inputs;
 use crate::probe::state::AppState;
