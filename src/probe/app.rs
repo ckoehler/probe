@@ -3,7 +3,7 @@ use crate::probe::state::{AppState, ProbeState, TabsState};
 pub struct App<'a> {
     pub title: &'a str,
     pub should_quit: bool,
-    pub tabs: TabsState<'a>,
+    pub tabs: TabsState,
     pub state: AppState,
 }
 
@@ -12,9 +12,14 @@ impl<'a> App<'a> {
         App {
             title,
             should_quit: false,
-            tabs: TabsState::new(vec!["Tab0", "Tab1", "Tab2"]),
+            tabs: TabsState::new(),
             state: state,
         }
+    }
+
+    pub fn probes_for_tab(&self) -> Vec<ProbeState> {
+        self.state
+            .probes_for_tab(self.tabs.index, self.tabs.probe_num)
     }
 
     pub fn on_up(&mut self) {}

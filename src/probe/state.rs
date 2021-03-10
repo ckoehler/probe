@@ -1,25 +1,31 @@
 use crate::probe::config;
 use regex::Regex;
+use std::cmp;
 use std::collections::VecDeque;
 
-pub struct TabsState<'a> {
-    pub titles: Vec<&'a str>,
+pub struct TabsState {
+    pub num: usize,
+    pub probe_num: usize,
     pub index: usize,
 }
 
-impl<'a> TabsState<'a> {
-    pub fn new(titles: Vec<&'a str>) -> TabsState {
-        TabsState { titles, index: 0 }
+impl TabsState {
+    pub fn new() -> TabsState {
+        TabsState {
+            num: 1,
+            probe_num: 0,
+            index: 0,
+        }
     }
     pub fn next(&mut self) {
-        self.index = (self.index + 1) % self.titles.len();
+        self.index = (self.index + 1) % self.num;
     }
 
     pub fn previous(&mut self) {
         if self.index > 0 {
             self.index -= 1;
         } else {
-            self.index = self.titles.len() - 1;
+            self.index = self.num - 1;
         }
     }
 }
@@ -42,6 +48,11 @@ impl AppState {
         AppState {
             probes: p.iter().map(|i| ProbeState::from(i.clone())).collect(),
         }
+    }
+
+    pub fn probes_for_tab(&self, index: usize, num: usize) -> Vec<ProbeState> {
+        let upper = cmp::min(index * num + num, self.probes.len());
+        self.probes[index * num..upper].to_vec()
     }
 }
 

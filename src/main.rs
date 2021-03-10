@@ -56,8 +56,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     // event loop
     loop {
         {
-            let app = app.lock().unwrap();
-            terminal.draw(|f| ui::draw(f, &app))?;
+            let mut app = app.lock().unwrap();
+            terminal.draw(|f| ui::draw(f, &mut app))?;
         }
 
         match events.next()? {
