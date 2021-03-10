@@ -39,6 +39,12 @@ impl<'a> App<'a> {
             'q' => {
                 self.should_quit = true;
             }
+            'h' => {
+                self.tabs.previous();
+            }
+            'l' => {
+                self.tabs.next();
+            }
             _ => {}
         }
     }
