@@ -22,16 +22,26 @@ impl<'a> App<'a> {
             .probes_for_tab(self.tabs.index, self.tabs.probe_num)
     }
 
-    pub fn on_up(&mut self) {}
+    pub fn on_up(&mut self) {
+        let sel = self.state.selected_probe as i32;
+        let num_probes = self.state.probes.len() as i32;
+        self.state.selected_probe = (sel - 1).rem_euclid(num_probes - 1) as usize;
+    }
 
-    pub fn on_down(&mut self) {}
+    pub fn on_down(&mut self) {
+        let sel = self.state.selected_probe as i32;
+        let num_probes = self.state.probes.len() as i32;
+        self.state.selected_probe = (sel + 1).rem_euclid(num_probes - 1) as usize;
+    }
 
     pub fn on_right(&mut self) {
         self.tabs.next();
+        self.state.selected_probe = 0;
     }
 
     pub fn on_left(&mut self) {
         self.tabs.previous();
+        self.state.selected_probe = 0;
     }
 
     pub fn on_key(&mut self, c: char) {
@@ -40,10 +50,19 @@ impl<'a> App<'a> {
                 self.should_quit = true;
             }
             'h' => {
-                self.tabs.previous();
+                self.on_left();
+            }
+            'j' => {
+                self.on_down();
+            }
+            'k' => {
+                self.on_up();
             }
             'l' => {
-                self.tabs.next();
+                self.on_right();
+            }
+            '\n' => {
+                self.state.detail_view = !self.state.detail_view;
             }
             _ => {}
         }
