@@ -41,9 +41,9 @@ pub struct ProbeState {
     pub name: String,
     pub filter: String,
     pub count: u32,
-    pub messages: String,
     ring: VecDeque<u64>,
     ring_buffer: u64,
+    messages: VecDeque<String>,
 }
 
 impl AppState {
@@ -69,12 +69,23 @@ impl ProbeState {
         if self.filter != "" {
             let re = Regex::new(&self.filter).unwrap();
             if re.is_match(msg) {
-                self.messages += msg;
+                self.update_message_buffer(msg);
                 self.count += 1;
                 self.ring_buffer += 1;
             }
         } else {
-            self.messages += msg;
+            self.update_message_buffer(msg);
+        }
+    }
+
+    pub fn messages(self) -> String {
+        self.messages.clone().make_contiguous().to_vec().join("\n")
+    }
+
+    pub fn update_message_buffer(&mut self, msg: &String) {
+        self.messages.push_front(msg.to_string());
+        if self.messages.len() >= 60 {
+            self.messages.pop_back();
         }
     }
 
@@ -99,7 +110,7 @@ impl From<config::Probe> for ProbeState {
             filter: item.filter.unwrap_or(".*".to_string()),
             count: 0,
             ring_buffer: 0,
-            messages: String::new(),
+            messages: VecDeque::with_capacity(60),
             ring: VecDeque::with_capacity(60),
         }
     }

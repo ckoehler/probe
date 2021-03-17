@@ -17,17 +17,17 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     }
 }
 pub fn draw_detail<B: Backend>(f: &mut Frame<B>, app: &mut App) {
-    let chunks = Layout::default()
-        .constraints([Constraint::Length(3), Constraint::Min(62)].as_ref())
-        .margin(1)
-        .split(f.size());
-    let text = app.state.selected_probe().messages;
+    let text = app.state.selected_probe().messages();
     let p = Paragraph::new(text)
-        .block(Block::default().title("Paragraph").borders(Borders::ALL))
+        .block(
+            Block::default()
+                .title(app.state.selected_probe().name)
+                .borders(Borders::ALL),
+        )
         .style(Style::default().fg(Color::White).bg(Color::Black))
         .wrap(Wrap { trim: true });
 
-    f.render_widget(p, chunks[1]);
+    f.render_widget(p, f.size());
 }
 
 pub fn draw_list<B: Backend>(f: &mut Frame<B>, app: &mut App) {
