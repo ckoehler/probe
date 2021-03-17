@@ -33,6 +33,8 @@ impl TabsState {
 #[derive(Debug)]
 pub struct AppState {
     pub probes: Vec<ProbeState>,
+    pub selected_probe: usize,
+    pub detail_view: bool,
 }
 #[derive(Clone, Debug)]
 pub struct ProbeState {
@@ -41,13 +43,19 @@ pub struct ProbeState {
     pub count: u32,
     ring: VecDeque<u64>,
     ring_buffer: u64,
+    messages: VecDeque<String>,
 }
 
 impl AppState {
     pub fn from_probes(p: Vec<config::Probe>) -> AppState {
         AppState {
             probes: p.iter().map(|i| ProbeState::from(i.clone())).collect(),
+            selected_probe: 0,
+            detail_view: false,
         }
+    }
+    pub fn selected_probe(&self) -> ProbeState {
+        self.probes[self.selected_probe].clone()
     }
 
     pub fn probes_for_tab(&self, index: usize, num: usize) -> Vec<ProbeState> {
@@ -61,9 +69,23 @@ impl ProbeState {
         if self.filter != "" {
             let re = Regex::new(&self.filter).unwrap();
             if re.is_match(msg) {
+                self.update_message_buffer(msg);
                 self.count += 1;
                 self.ring_buffer += 1;
             }
+        } else {
+            self.update_message_buffer(msg);
+        }
+    }
+
+    pub fn messages(self) -> String {
+        self.messages.clone().make_contiguous().to_vec().join("\n")
+    }
+
+    pub fn update_message_buffer(&mut self, msg: &String) {
+        self.messages.push_front(msg.to_string());
+        if self.messages.len() >= 60 {
+            self.messages.pop_back();
         }
     }
 
@@ -88,6 +110,7 @@ impl From<config::Probe> for ProbeState {
             filter: item.filter.unwrap_or(".*".to_string()),
             count: 0,
             ring_buffer: 0,
+            messages: VecDeque::with_capacity(60),
             ring: VecDeque::with_capacity(60),
         }
     }
