@@ -7,8 +7,11 @@ Probe is a ZMQ PUB/SUB monitor built with TUI.
 
 # Keyboard Shortcuts
 
-| Key | Action |
-| ----| -----  |
-|  q  | Quit   |
-|  h, Left  | Previous Tab   |
-|  l, Right  | Next Tab   |
+| Key      | Action                          |
+| ----     | -----                           |
+| q        | Quit                            |
+| h, Left  | Previous Tab                    |
+| l, Right | Next Tab                        |
+| j        | Next Probe                      |
+| k        | Previous Probe                  |
+| <Enter>  | Show Details for selected probe |
