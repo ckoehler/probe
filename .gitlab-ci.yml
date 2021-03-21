@@ -6,7 +6,7 @@ build:
   image: rust:slim-buster
   script:
     - apt update
-    - apt install -y cmake
+    - apt install -y cmake build-essential
     - cargo build --release
     - tar czf probe.tar.gz -C target/release probe
   artifacts:
