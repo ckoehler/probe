@@ -1,9 +1,5 @@
 use std::io;
 use std::sync::mpsc;
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-};
 use std::thread;
 use std::time::Duration;
 use termion::event::Key;
@@ -18,9 +14,6 @@ pub enum Event<I> {
 /// type is handled in its own thread and returned to a common `Receiver`
 pub struct Events {
     rx: mpsc::Receiver<Event<Key>>,
-    input_handle: thread::JoinHandle<()>,
-    ignore_exit_key: Arc<AtomicBool>,
-    tick_handle: thread::JoinHandle<()>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -41,10 +34,8 @@ impl Default for Config {
 impl Events {
     pub fn with_config(config: Config) -> Events {
         let (tx, rx) = mpsc::channel();
-        let ignore_exit_key = Arc::new(AtomicBool::new(false));
-        let input_handle = {
+        {
             let tx = tx.clone();
-            let ignore_exit_key = ignore_exit_key.clone();
             thread::spawn(move || {
                 let stdin = io::stdin();
                 for evt in stdin.keys() {
@@ -53,14 +44,14 @@ impl Events {
                             eprintln!("{}", err);
                             return;
                         }
-                        if !ignore_exit_key.load(Ordering::Relaxed) && key == config.exit_key {
+                        if key == config.exit_key {
                             return;
                         }
                     }
                 }
-            })
-        };
-        let tick_handle = {
+            });
+        }
+        {
             let tx = tx.clone();
             thread::spawn(move || loop {
                 if tx.send(Event::Tick).is_err() {
@@ -69,12 +60,7 @@ impl Events {
                 thread::sleep(config.tick_rate);
             })
         };
-        Events {
-            rx,
-            ignore_exit_key,
-            input_handle,
-            tick_handle,
-        }
+        Events { rx }
     }
 
     pub fn next(&self) -> Result<Event<Key>, mpsc::RecvError> {
