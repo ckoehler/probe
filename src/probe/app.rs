@@ -25,13 +25,13 @@ impl<'a> App<'a> {
     pub fn on_up(&mut self) {
         let sel = self.state.selected_probe as i32;
         let num_probes = self.state.probes.len() as i32;
-        self.state.selected_probe = (sel - 1).rem_euclid(num_probes - 1) as usize;
+        self.state.selected_probe = (sel - 1).rem_euclid(num_probes) as usize;
     }
 
     pub fn on_down(&mut self) {
         let sel = self.state.selected_probe as i32;
         let num_probes = self.state.probes.len() as i32;
-        self.state.selected_probe = (sel + 1).rem_euclid(num_probes - 1) as usize;
+        self.state.selected_probe = (sel + 1).rem_euclid(num_probes) as usize;
     }
 
     pub fn on_right(&mut self) {
