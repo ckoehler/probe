@@ -20,6 +20,7 @@ build_centos:
   before_script:
     - yum -y update
     - yum -y install curl
+    - yum group install "Development Tools"
     - curl https://sh.rustup.rs -sSf | sh -s -- -y
     - source $HOME/.cargo/env
   script:
