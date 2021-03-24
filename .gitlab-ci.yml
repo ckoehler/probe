@@ -1,19 +1,7 @@
 ---
 
 build:
-  tags:
-    - docker
-  image: rust:slim-buster
-  script:
-    - apt update
-    - apt install -y cmake build-essential
-    - cargo build --release
-    - tar czf probe.tar.gz -C target/release probe
-  artifacts:
-    paths:
-      - probe.tar.gz
-
-build_centos:
+  stage: build
   tags:
     - docker
   image: centos:7
@@ -29,3 +17,24 @@ build_centos:
   artifacts:
     paths:
       - probe.tar.gz
+
+release_job:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  variables:
+    FILE: probe-$CI_COMMIT_TAG.tar.gz
+    DEST:  "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/probe/${CI_COMMIT_TAG}/$FILE"
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - echo $DEST
+    - echo $FILE
+    - mv probe.tar.gz $FILE
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $FILE $DEST'
+  needs:
+    - build
+  release:
+    name: 'Release $CI_COMMIT_TAG'
+    description: './Changelog.md'
+    tag_name: '$CI_COMMIT_TAG'
+    ref: '$CI_COMMIT_TAG'
