@@ -30,12 +30,13 @@ build:
 upload:
   stage: upload
   image: curlimages/curl:latest
+  script:
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${FILENAME} ${DEST}
   rules:
     - if: $CI_COMMIT_TAG
   needs:
     - build
-  script:
-    - curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${FILENAME} ${DEST}
 
 release:
   stage: deploy
