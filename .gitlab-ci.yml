@@ -31,6 +31,7 @@ upload:
   stage: upload
   image: curlimages/curl:latest
   script:
+    - mv probe.tar.gz $FILENAME
     - |
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${FILENAME} ${DEST}
   rules:
