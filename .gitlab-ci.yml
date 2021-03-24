@@ -19,11 +19,8 @@ build:
     - yum -y install curl cmake
     - yum -y group install "Development Tools"
     - curl https://sh.rustup.rs -sSf | sh -s -- -y
-    - echo $CARGO_HOME
     - source $CARGO_HOME/env
   script:
-    - echo $FILENAME
-    - echo $DEST
     - cargo build --release
     - tar czf probe.tar.gz -C target/release probe
   cache:
@@ -41,7 +38,6 @@ upload:
   image: curlimages/curl:latest
   script:
     - mv probe.tar.gz $FILENAME
-    - echo "Uploading $FILENAME to $DEST"
     - |
       curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $FILENAME $DEST
   rules:
