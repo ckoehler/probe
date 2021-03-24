@@ -19,8 +19,8 @@ build:
     - yum -y install curl cmake
     - yum -y group install "Development Tools"
     - curl https://sh.rustup.rs -sSf | sh -s -- -y
-    - source $HOME/.cargo/env
     - echo $CARGO_HOME
+    - source $CARGO_HOME/env
   script:
     - cargo build --release
     - tar czf probe.tar.gz -C target/release probe
