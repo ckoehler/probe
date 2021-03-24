@@ -6,8 +6,8 @@ stages:
 
 variables:
   CARGO_HOME: $CI_PROJECT_DIR/.cargo
-  FILENAME: "probe-${CI_COMMIT_TAG}.tar.gz"
-  DEST:  "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/probe/${CI_COMMIT_TAG}/${FILENAME}"
+  FILENAME: "probe-$CI_COMMIT_TAG.tar.gz"
+  DEST:  "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/probe/$CI_COMMIT_TAG/$FILENAME"
 
 build:
   stage: build
@@ -39,9 +39,9 @@ upload:
   image: curlimages/curl:latest
   script:
     - mv probe.tar.gz $FILENAME
-    - echo "Uploading ${FILENAME} to ${DEST}"
+    - echo "Uploading $FILENAME to $DEST"
     - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${FILENAME} ${DEST}
+      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $FILENAME $DEST
   rules:
     - if: $CI_COMMIT_TAG
   needs:
@@ -57,5 +57,5 @@ release:
   script:
     - |
       release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
-        --assets-link "{\"name\":\"${FILENAME}\",\"url\":\"${DEST}\"}" \
+        --assets-link "{\"name\":\"$FILENAME\",\"url\":\"$DEST\"}" \
         --description "./Changelog.md"
