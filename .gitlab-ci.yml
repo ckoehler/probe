@@ -5,6 +5,7 @@ stages:
   - deploy
 
 variables:
+  CARGO_HOME: $CI_PROJECT_DIR/.cargo
   FILENAME: "probe-${CI_COMMIT_TAG}.tar.gz"
   DEST:  "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/probe/${CI_COMMIT_TAG}/$FILENAME"
 
@@ -19,9 +20,14 @@ build:
     - yum -y group install "Development Tools"
     - curl https://sh.rustup.rs -sSf | sh -s -- -y
     - source $HOME/.cargo/env
+    - echo $CARGO_HOME
   script:
     - cargo build --release
     - tar czf probe.tar.gz -C target/release probe
+  cache:
+    paths:
+      - .cargo
+
   artifacts:
     paths:
       - probe.tar.gz
