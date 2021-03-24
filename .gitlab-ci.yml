@@ -6,8 +6,8 @@ stages:
 
 variables:
   CARGO_HOME: $CI_PROJECT_DIR/.cargo
-  FILENAME: "probe-$CI_COMMIT_TAG.tar.gz"
-  DEST:  "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/probe/$CI_COMMIT_TAG/$FILENAME"
+  FILENAME: probe-$CI_COMMIT_TAG.tar.gz
+  DEST:  $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/probe/$CI_COMMIT_TAG/$FILENAME
 
 build:
   stage: build
@@ -22,6 +22,8 @@ build:
     - echo $CARGO_HOME
     - source $CARGO_HOME/env
   script:
+    - echo $FILENAME
+    - echo $DEST
     - cargo build --release
     - tar czf probe.tar.gz -C target/release probe
   cache:
