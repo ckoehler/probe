@@ -38,7 +38,7 @@ pub fn draw_list<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .map(|t| {
             Spans::from(Span::styled(
                 format!("Page {}", t + 1),
-                Style::default().fg(Color::Green),
+                Style::default().fg(Color::White),
             ))
         })
         .collect();
@@ -46,7 +46,7 @@ pub fn draw_list<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     app.tabs.probe_num = probes_per_tab as usize;
     let tabs = Tabs::new(titles)
         .block(Block::default().borders(Borders::ALL).title(app.title))
-        .highlight_style(Style::default().fg(Color::Yellow))
+        .highlight_style(Style::default().fg(Color::Blue))
         .select(app.tabs.index);
 
     let chunks = Layout::default()
@@ -70,13 +70,21 @@ where
 
     // for each probe, draw it in a chunk
     probes.iter().enumerate().for_each(|(i, p)| {
-        let block = Block::default().borders(Borders::ALL).title(p.name.clone());
+        let style = if i == app.state.selected_probe {
+            Style::default().fg(Color::Blue)
+        } else {
+            Style::default().fg(Color::White)
+        };
+        let block = Block::default()
+            .borders(Borders::ALL)
+            .title(p.name.clone())
+            .style(style);
         f.render_widget(block, chunks[i]);
-        draw_probe(f, &p, i == app.state.selected_probe, chunks[i]);
+        draw_probe(f, &p, chunks[i]);
     });
 }
 
-fn draw_probe<B>(f: &mut Frame<B>, probe: &ProbeState, selected: bool, area: Rect)
+fn draw_probe<B>(f: &mut Frame<B>, probe: &ProbeState, area: Rect)
 where
     B: Backend,
 {
@@ -87,18 +95,14 @@ where
         .margin(1)
         .split(area);
 
-    let style = if selected {
-        Style::default().fg(Color::Red)
-    } else {
-        Style::default().fg(Color::White)
-    };
+    let style = Style::default().fg(Color::White);
 
     let mut rows = Vec::new();
     rows.push(Row::new(vec![probe.filter.clone(), probe.count.to_string()]).style(style));
     let table = Table::new(rows)
         .header(
             Row::new(vec!["Match", "Count"])
-                .style(Style::default().fg(Color::Yellow))
+                .style(Style::default().fg(Color::White))
                 .bottom_margin(1),
         )
         .widths(&[Constraint::Length(8), Constraint::Length(6)]);
@@ -110,9 +114,9 @@ where
         .block(
             Block::default()
                 .title("Histogram")
-                .style(Style::default().fg(Color::Yellow)),
+                .style(Style::default().fg(Color::White)),
         )
-        .style(Style::default().fg(Color::Green))
+        .style(Style::default().fg(Color::Blue))
         .data(&data[..])
         .bar_set(tui::symbols::bar::THREE_LEVELS);
     f.render_widget(sparkline, chunks[1]);
