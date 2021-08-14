@@ -15,7 +15,7 @@ impl ZMQInput {
         socket.set_subscribe(&subscription).unwrap();
         ZMQInput {
             name: probe.name.clone(),
-            socket: socket,
+            socket,
         }
     }
 
