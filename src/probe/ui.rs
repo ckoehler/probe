@@ -1,22 +1,21 @@
 use crate::probe::app::App;
 use crate::probe::state::ProbeState;
-use tui::{
-    backend::Backend,
+use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
-    text::{Span, Spans},
+    text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Row, Sparkline, Table, Tabs, Wrap},
     Frame,
 };
 
-pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
+pub fn draw(f: &mut Frame, app: &mut App) {
     if app.state.detail_view {
         draw_detail(f, app);
     } else {
         draw_list(f, app);
     }
 }
-pub fn draw_detail<B: Backend>(f: &mut Frame<B>, app: &mut App) {
+pub fn draw_detail(f: &mut Frame, app: &mut App) {
     let text = app.state.selected_probe().messages();
     let p = Paragraph::new(text)
         .block(
@@ -30,13 +29,13 @@ pub fn draw_detail<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     f.render_widget(p, f.size());
 }
 
-pub fn draw_list<B: Backend>(f: &mut Frame<B>, app: &mut App) {
+pub fn draw_list(f: &mut Frame, app: &mut App) {
     let num_probes = app.state.probes.len() as u16;
     let probes_per_tab: u16 = (f.size().height - 3) / 5;
     let num_tabs = ((num_probes as f64 / probes_per_tab as f64).ceil()) as u16;
-    let titles: Vec<Spans> = (0..num_tabs)
+    let titles: Vec<Line> = (0..num_tabs)
         .map(|t| {
-            Spans::from(Span::styled(
+            Line::from(Span::styled(
                 format!("Page {}", t + 1),
                 Style::default().fg(Color::White),
             ))
@@ -56,10 +55,7 @@ pub fn draw_list<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     draw_tab(f, app, chunks[1]);
 }
 
-fn draw_tab<B>(f: &mut Frame<B>, app: &App, area: Rect)
-where
-    B: Backend,
-{
+fn draw_tab(f: &mut Frame, app: &App, area: Rect) {
     // create blocks for each probe
     let probes = app.probes_for_tab();
     let num_probes = probes.len();
@@ -80,14 +76,11 @@ where
             .title(p.name.clone())
             .style(style);
         f.render_widget(block, chunks[i]);
-        draw_probe(f, &p, chunks[i]);
+        draw_probe(f, p, chunks[i]);
     });
 }
 
-fn draw_probe<B>(f: &mut Frame<B>, probe: &ProbeState, area: Rect)
-where
-    B: Backend,
-{
+fn draw_probe(f: &mut Frame, probe: &ProbeState, area: Rect) {
     // split the area in two: left for the table, right for the histogram
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
@@ -99,13 +92,12 @@ where
 
     let mut rows = Vec::new();
     rows.push(Row::new(vec![probe.filter.clone(), probe.count.to_string()]).style(style));
-    let table = Table::new(rows)
-        .header(
-            Row::new(vec!["Match", "Count"])
-                .style(Style::default().fg(Color::White))
-                .bottom_margin(1),
-        )
-        .widths(&[Constraint::Length(8), Constraint::Length(6)]);
+    let widths = [Constraint::Length(8), Constraint::Length(6)];
+    let table = Table::new(rows, widths).header(
+        Row::new(vec!["Match", "Count"])
+            .style(Style::default().fg(Color::White))
+            .bottom_margin(1),
+    );
     f.render_widget(table, chunks[0]);
 
     // fill the histogram
@@ -118,6 +110,6 @@ where
         )
         .style(Style::default().fg(Color::Blue))
         .data(&data[..])
-        .bar_set(tui::symbols::bar::THREE_LEVELS);
+        .bar_set(ratatui::symbols::bar::THREE_LEVELS);
     f.render_widget(sparkline, chunks[1]);
 }

@@ -7,12 +7,12 @@ use crate::probe::inputs::Inputs;
 use crate::probe::state::AppState;
 use crate::probe::ui;
 
+use ratatui::{backend::TermionBackend, Terminal};
 use std::fs;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::{error::Error, io, time::Duration};
-use termion::{event::Key, input::MouseTerminal, raw::IntoRawMode, screen::AlternateScreen};
-use tui::{backend::TermionBackend, Terminal};
+use termion::{event::Key, input::MouseTerminal, raw::IntoRawMode, screen::IntoAlternateScreen};
 
 fn main() -> Result<(), Box<dyn Error>> {
     // get config
@@ -23,9 +23,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     // println!("{:?}", probes);
 
     // set up terminal
-    let stdout = io::stdout().into_raw_mode()?;
+    let stdout = io::stdout().into_raw_mode()?.into_alternate_screen()?;
     let stdout = MouseTerminal::from(stdout);
-    let stdout = AlternateScreen::from(stdout);
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
@@ -44,12 +43,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     // input loop
     let tapp = Arc::clone(&app);
     thread::spawn(move || loop {
-        match inputs.next() {
-            msg => {
-                let msg = msg.unwrap();
-                let mut app = tapp.lock().unwrap();
-                app.process_message_for_stream(msg.0, msg.1);
-            }
+        let msg = inputs.next();
+        {
+            let msg = msg.unwrap();
+            let mut app = tapp.lock().unwrap();
+            app.process_message_for_stream(msg.0, msg.1);
         }
     });
 

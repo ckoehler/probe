@@ -6,8 +6,8 @@ edition = "2018"
 license-file = "LICENSE-MIT"
 
 [dependencies]
-tui = "0.14"
-termion = "1"
+ratatui = { version = "0.25", features = ["termion"]}
+termion = "2"
 argh="0.1"
 regex = "1"
 itertools = "0.12"
