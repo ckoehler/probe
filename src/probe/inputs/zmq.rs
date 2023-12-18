@@ -11,7 +11,7 @@ impl ZMQInput {
         let ctx = zmq::Context::new();
         let socket = ctx.socket(zmq::SUB).unwrap();
         socket.connect(&probe.address).unwrap();
-        let subscription = format!("").into_bytes();
+        let subscription = String::new().into_bytes();
         socket.set_subscribe(&subscription).unwrap();
         ZMQInput {
             name: probe.name.clone(),
@@ -30,6 +30,6 @@ impl ZMQInput {
     }
 
     pub fn name(&self) -> String {
-        return self.name.clone();
+        self.name.clone()
     }
 }

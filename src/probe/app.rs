@@ -13,7 +13,7 @@ impl<'a> App<'a> {
             title,
             should_quit: false,
             tabs: TabsState::new(),
-            state: state,
+            state,
         }
     }
 

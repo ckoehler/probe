@@ -66,7 +66,7 @@ impl AppState {
 
 impl ProbeState {
     pub fn process_message(&mut self, msg: &String) {
-        if self.filter != "" {
+        if !self.filter.is_empty() {
             let re = Regex::new(&self.filter).unwrap();
             if re.is_match(msg) {
                 self.update_message_buffer(msg);

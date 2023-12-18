@@ -90,8 +90,8 @@ fn draw_probe(f: &mut Frame, probe: &ProbeState, area: Rect) {
 
     let style = Style::default().fg(Color::White);
 
-    let mut rows = Vec::new();
-    rows.push(Row::new(vec![probe.filter.clone(), probe.count.to_string()]).style(style));
+    let rows = vec![Row::new(vec![probe.filter.clone(), probe.count.to_string()]).style(style)];
+
     let widths = [Constraint::Length(8), Constraint::Length(6)];
     let table = Table::new(rows, widths).header(
         Row::new(vec!["Match", "Count"])
