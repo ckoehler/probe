@@ -2,7 +2,7 @@
 name = "probe"
 version = "0.1.0"
 authors = ["Christoph Koehler <christoph@zerodeviation.net>"]
-edition = "2018"
+edition = "2021"
 license-file = "LICENSE-MIT"
 
 [dependencies]
@@ -14,5 +14,5 @@ itertools = "0.12"
 rand = "0.8"
 toml = "0.8"
 serde = { version = "1.0", features = ["derive"] }
-tokio = "*"
+tokio = "1.35"
 zmq = "0.10"
