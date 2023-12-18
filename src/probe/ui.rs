@@ -2,7 +2,6 @@ use crate::probe::app::App;
 use crate::probe::state::ProbeState;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    prelude::*,
     style::{Color, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Row, Sparkline, Table, Tabs, Wrap},
