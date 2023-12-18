@@ -2,6 +2,7 @@ use crate::probe::app::App;
 use crate::probe::state::ProbeState;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
+    prelude::*,
     style::{Color, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Row, Sparkline, Table, Tabs, Wrap},
@@ -49,10 +50,27 @@ pub fn draw_list(f: &mut Frame, app: &mut App) {
         .select(app.tabs.index);
 
     let chunks = Layout::default()
-        .constraints([Constraint::Length(3), Constraint::Min(0)].as_ref())
+        .constraints(
+            [
+                Constraint::Length(3),
+                Constraint::Min(0),
+                Constraint::Length(3),
+            ]
+            .as_ref(),
+        )
         .split(f.size());
     f.render_widget(tabs, chunks[0]);
     draw_tab(f, app, chunks[1]);
+
+    let help_text = Line::raw(String::from(
+        "j/k: up/down; enter: show/hide details; h/l: prev/next page; q: quit",
+    ));
+    let p = Paragraph::new(help_text)
+        .block(Block::default().title("Keys").borders(Borders::ALL))
+        .style(Style::default().fg(Color::White).bg(Color::Black))
+        .wrap(Wrap { trim: true });
+
+    f.render_widget(p, chunks[2]);
 }
 
 fn draw_tab(f: &mut Frame, app: &App, area: Rect) {
