@@ -3,17 +3,16 @@ name = "probe"
 version = "0.1.0"
 authors = ["Christoph Koehler <christoph@zerodeviation.net>"]
 edition = "2018"
-license = "MIT"
 license-file = "LICENSE-MIT"
 
 [dependencies]
 tui = "0.14"
-termion = "1.5"
+termion = "1"
 argh="0.1"
 regex = "1"
-itertools = "0.10"
-rand = "0.7"
-toml = "0.5"
+itertools = "0.12"
+rand = "0.8"
+toml = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 tokio = "*"
-zmq = { version = "0.9", features = ["vendored"] }
+zmq = "0.10"
