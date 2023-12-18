@@ -13,13 +13,7 @@ build:
   stage: build
   tags:
     - docker
-  image: centos:7
-  before_script:
-    - yum -y update
-    - yum -y install curl cmake
-    - yum -y group install "Development Tools"
-    - curl https://sh.rustup.rs -sSf | sh -s -- -y
-    - source $CARGO_HOME/env
+  image: messense/cargo-zigbuild:latest
   script:
     - cargo build --release
     - tar czf probe.tar.gz -C target/release probe
