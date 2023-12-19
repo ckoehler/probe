@@ -43,13 +43,13 @@ cross_build:
     - export DIR=$(echo $TARGET | cut -d. -f1)
     - cargo zigbuild --release --target $TARGET
     - tar czf probe_$TARGET.tgz -C target/$DIR/release probe
-  # cache:
-  #   paths:
-  #     - target
-      # - .cargo
-  # artifacts:
-  #   paths:
-  #     - probe.tar.gz
+  cache:
+    paths:
+      - target
+      - .cargo
+  artifacts:
+    paths:
+      - "probe_$TARGET.tgz"
 
 # build:
 #   stage: build
