@@ -2,6 +2,8 @@
 
 Probe is a TUI ZMQ PUB/SUB monitor and debugger.
 
+[![Build status](https://github.com/ckoehler/probe/workflows/ci/badge.svg)](https://github.com/ckoehler/probe/actions)
+
 
 ![screenshot](assets/screen1.png)
 
