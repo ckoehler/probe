@@ -30,6 +30,7 @@ name = "Probe 1"
 address = "tcp://127.0.0.1:5555"
 name = "Probe 2"
 filter = "2"
+```
 
 
 | Config   | Meaning    |
@@ -37,5 +38,3 @@ filter = "2"
 | `address`   | The ZMQ socket to subscribe to   |
 | `name`   | The name of this probe, shown in the UI   |
 | `filter`   | Optional regex filter, applied to the ZMQ message body. Default: `.*`   |
-
-```
