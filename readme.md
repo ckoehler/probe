@@ -1,9 +1,6 @@
 # Probe
 
-
-[![pipeline status](https://gitlab.com/godfool/probe/badges/master/pipeline.svg)](https://gitlab.com/godfool/probe/-/commits/master)
-
-Probe is a ZMQ PUB/SUB monitor built with TUI.
+Probe is a TUI ZMQ PUB/SUB monitor and debugger.
 
 
 ![screenshot](assets/screen1.png)
