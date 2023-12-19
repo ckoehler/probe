@@ -29,7 +29,7 @@ permissions:
 
 jobs:
   rustfmt:
-    runs-on: rust:latest
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
       run: cargo fmt --all --check
 
   clippy:
-    runs-on: rust:latest
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
