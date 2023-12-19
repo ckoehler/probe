@@ -1,9 +1,9 @@
-use std::io;
+use crossterm::event::read;
+use crossterm::event::KeyCode;
+use crossterm::event::KeyEvent;
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
-use termion::event::Key;
-use termion::input::TermRead;
 
 pub enum Event<I> {
     Input(I),
@@ -13,19 +13,19 @@ pub enum Event<I> {
 /// A small event handler that wrap termion input and tick events. Each event
 /// type is handled in its own thread and returned to a common `Receiver`
 pub struct Events {
-    rx: mpsc::Receiver<Event<Key>>,
+    rx: mpsc::Receiver<Event<KeyEvent>>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Config {
-    pub exit_key: Key,
+    pub exit_key: KeyCode,
     pub tick_rate: Duration,
 }
 
 impl Default for Config {
     fn default() -> Config {
         Config {
-            exit_key: Key::Char('q'),
+            exit_key: KeyCode::Char('q'),
             tick_rate: Duration::from_millis(250),
         }
     }
@@ -37,14 +37,14 @@ impl Events {
         {
             let tx = tx.clone();
             thread::spawn(move || {
-                let stdin = io::stdin();
-                for key in stdin.keys().flatten() {
-                    if let Err(err) = tx.send(Event::Input(key)) {
-                        eprintln!("{}", err);
-                        return;
-                    }
-                    if key == config.exit_key {
-                        return;
+                loop {
+                    if let Ok(crossterm::event::Event::Key(key)) = read() {
+                        if let Err(err) = tx.send(Event::Input(key)) {
+                            eprintln!("{}", err);
+                        }
+                        // if key == config.exit_key.into() {
+                        //     return;
+                        // }
                     }
                 }
             });
@@ -61,7 +61,7 @@ impl Events {
         Events { rx }
     }
 
-    pub fn next(&self) -> Result<Event<Key>, mpsc::RecvError> {
+    pub fn next(&self) -> Result<Event<KeyEvent>, mpsc::RecvError> {
         self.rx.recv()
     }
 }
