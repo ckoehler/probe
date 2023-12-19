@@ -1,12 +1,6 @@
 [[probes]]
 address = "tcp://127.0.0.1:5556"
 name = "Probe 1"
-#[[probes.filters]]
-#name = "Foo"
-#pattern = "123"
-#[[probes.filters]]
-#name = "Bar"
-#pattern = "456"
 [[probes]]
 address = "tcp://127.0.0.1:5556"
 name = "Probe 2"
