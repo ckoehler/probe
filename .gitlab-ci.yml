@@ -25,23 +25,47 @@ fmt:
     - rustup component add rustfmt
     - cargo fmt -- --check
 
-build:
+cross_build:
   stage: build
   tags:
     - docker
   image: messense/cargo-zigbuild:latest
+  parallel:
+    matrix:
+      - TARGET: 
+        - aarch64-unknown-linux-gnu.2.17
+        - x86_64-unknown-linux-gnu.2.17
+        - armv7-unknown-linux-gnueabihf.2.17
   script:
-    - cargo build --release
-    - tar czf probe.tar.gz -C target/release probe
-  cache:
-    paths:
-      - target
-      - .cargo
+    - cargo zigbuild --release --target $TARGET
+    - ls target 
+    - ls target/release
+    # - tar czf probe.tar.gz -C target/release probe
+  # cache:
+  #   paths:
+  #     - target
+      # - .cargo
+  # artifacts:
+  #   paths:
+  #     - probe.tar.gz
 
-  artifacts:
-    paths:
-      - probe.tar.gz
-
+# build:
+#   stage: build
+#   tags:
+#     - docker
+#   image: messense/cargo-zigbuild:latest
+#   script:
+#     - cargo build --release
+#     - tar czf probe.tar.gz -C target/release probe
+#   cache:
+#     paths:
+#       - target
+#       - .cargo
+#
+#   artifacts:
+#     paths:
+#       - probe.tar.gz
+#
 
 upload:
   stage: upload
