@@ -33,16 +33,16 @@ cross_build:
   parallel:
     matrix:
       - TARGET: 
-        - aarch64-unknown-linux-gnu 
-        - x86_64-unknown-linux-gnu
+        - aarch64-unknown-linux-gnu.2.17
+        - x86_64-unknown-linux-gnu.2.17
+        - universal2-apple-darwin
         # re-enable when using zig 0.11
-        # - armv7-unknown-linux-gnueabihf
-        LIBC: ["2.17"]
+        # - armv7-unknown-linux-gnueabihf.2.17
   script:
-    - rustup target add $TARGET
-    - cargo zigbuild --release --target $TARGET.$LIBC
-    - ls target/$TARGET/release
-    - tar czf probe.tar.gz -C target/$TARGET/release probe
+    # cut the GLIBC version off, if required
+    - export DIR=$(echo $TARGET | cut -d. -f1)
+    - cargo zigbuild --release --target $TARGET
+    - tar czf probe_$TARGET.tgz -C target/$DIR/release probe
   # cache:
   #   paths:
   #     - target
