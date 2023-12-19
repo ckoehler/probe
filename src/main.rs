@@ -6,13 +6,16 @@ use crate::probe::event::{Config, Event, Events};
 use crate::probe::inputs::Inputs;
 use crate::probe::state::AppState;
 use crate::probe::ui;
-
-use ratatui::{backend::TermionBackend, Terminal};
+use crossterm::{
+    event::KeyCode,
+    terminal::{enable_raw_mode, EnterAlternateScreen},
+    ExecutableCommand,
+};
+use ratatui::{backend::CrosstermBackend, Terminal};
 use std::fs;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::{error::Error, io, time::Duration};
-use termion::{event::Key, input::MouseTerminal, raw::IntoRawMode, screen::IntoAlternateScreen};
 
 fn main() -> Result<(), Box<dyn Error>> {
     // get config
@@ -23,10 +26,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     // println!("{:?}", probes);
 
     // set up terminal
-    let stdout = io::stdout().into_raw_mode()?.into_alternate_screen()?;
-    let stdout = MouseTerminal::from(stdout);
-    let backend = TermionBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
+    enable_raw_mode()?;
+    io::stdout().execute(EnterAlternateScreen)?;
+    let mut terminal = Terminal::new(CrosstermBackend::new(io::stdout()))?;
 
     // setup inputs
     let inputs = Inputs::with_probes(probes.probes.clone());
@@ -59,24 +61,28 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         match events.next()? {
-            Event::Input(key) => match key {
-                Key::Char(c) => {
+            Event::Input(key) => match key.code {
+                KeyCode::Char(c) => {
                     let mut app = app.lock().unwrap();
                     app.on_key(c);
                 }
-                Key::Up => {
+                KeyCode::Enter => {
+                    let mut app = app.lock().unwrap();
+                    app.on_key('\n');
+                }
+                KeyCode::Up => {
                     let mut app = app.lock().unwrap();
                     app.on_up();
                 }
-                Key::Down => {
+                KeyCode::Down => {
                     let mut app = app.lock().unwrap();
                     app.on_down();
                 }
-                Key::Left => {
+                KeyCode::Left => {
                     let mut app = app.lock().unwrap();
                     app.on_left();
                 }
-                Key::Right => {
+                KeyCode::Right => {
                     let mut app = app.lock().unwrap();
                     app.on_right();
                 }
