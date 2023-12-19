@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Christoph Koehler <christoph@zerodeviation.net>"]
 edition = "2021"
 license-file = "LICENSE-MIT"
+repository = "https://github.com/ckoehler/probe"
 
 [dependencies]
 ratatui = { version = "0.25", features = ["termion"]}
@@ -16,3 +17,21 @@ toml = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 tokio = "1.35"
 zmq = "0.10"
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
+
+# Config for 'cargo dist'
+[workspace.metadata.dist]
+# The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.5.0"
+# CI backends to support
+ci = ["github"]
+# The installers to generate for each app
+installers = ["shell", "powershell"]
+# Target platforms to build apps for (Rust target-triple syntax)
+targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-musl", "x86_64-pc-windows-msvc"]
+# Publish jobs to run in CI
+pr-run-mode = "plan"
