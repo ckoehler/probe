@@ -5,6 +5,7 @@ authors = ["Christoph Koehler <christoph@zerodeviation.net>"]
 edition = "2021"
 license-file = "LICENSE-MIT"
 repository = "https://github.com/ckoehler/probe"
+publish = false
 
 [dependencies]
 ratatui = { version = "0.25", features = ["termion"]}
