@@ -8,7 +8,7 @@ use crate::probe::state::AppState;
 use crate::probe::ui;
 use crossterm::{
     event::KeyCode,
-    terminal::{enable_raw_mode, EnterAlternateScreen},
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
@@ -95,6 +95,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         let app = app.lock().unwrap();
         if app.should_quit {
+            io::stdout().execute(LeaveAlternateScreen)?;
+            disable_raw_mode()?;
             break;
         }
     }
