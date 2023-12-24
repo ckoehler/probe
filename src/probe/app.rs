@@ -1,5 +1,6 @@
 use crate::probe::state::{AppState, Probe, TabsState};
 
+#[derive(Debug)]
 pub struct App<'a> {
     pub title: &'a str,
     pub should_quit: bool,
@@ -9,19 +10,14 @@ pub struct App<'a> {
 
 impl<'a> App<'a> {
     pub fn new(title: &'a str, state: AppState) -> App<'a> {
+        let num_probes = state.probes.len();
         App {
             title,
             should_quit: false,
-            tabs: TabsState::new(),
+            tabs: TabsState::new(num_probes),
             state,
         }
     }
-
-    /// Takes the tab state (current tab) and selected probe on that tab and translates them to a
-    /// Probe.
-    // fn get_selected_probe_index(&self) -> Probe {
-    //     todo!()
-    // }
 
     pub fn probes_for_tab(&self) -> Vec<Probe> {
         self.state
@@ -29,26 +25,23 @@ impl<'a> App<'a> {
     }
 
     pub fn on_up(&mut self) {
-        let sel = self.state.selected_probe as i32;
-        // let probes_per_tab = self.tabs.probes_per_tab;
-        let num_probes = self.state.probes.len() as i32;
-        self.state.selected_probe = (sel - 1).rem_euclid(num_probes) as usize;
+        self.tabs.prev_probe();
     }
 
     pub fn on_down(&mut self) {
-        let sel = self.state.selected_probe as i32;
-        let num_probes = self.state.probes.len() as i32;
-        self.state.selected_probe = (sel + 1).rem_euclid(num_probes) as usize;
+        self.tabs.next_probe();
     }
 
     pub fn on_right(&mut self) {
         self.tabs.next();
-        self.state.selected_probe = 0;
     }
 
     pub fn on_left(&mut self) {
         self.tabs.previous();
-        self.state.selected_probe = 0;
+    }
+
+    pub fn selected_probe(&self) -> Probe {
+        self.state.probes[self.tabs.selected_probe_index()].clone()
     }
 
     pub fn on_key(&mut self, c: char) {
@@ -115,16 +108,16 @@ mod tests {
                 address: String::from(""),
             },
         ];
-        let state = AppState::from_probes(config);
+        let state = AppState::from_probes(config.clone());
         let mut app = App::new("Probe", state);
 
-        // set probes per tab manually
-        app.tabs.probes_per_tab = 1;
-        assert_eq!(app.state.selected_probe().name, String::from("0"));
+        // TODO: make this more robust; panics if not set
+        app.tabs.recalculate_layout(config.len(), 1);
+        assert_eq!(app.selected_probe().name, String::from("0"));
 
         // there's only one probe, so this should do nothing
         app.on_down();
-        assert_eq!(app.state.selected_probe().name, String::from("0"));
+        assert_eq!(app.selected_probe().name, String::from("0"));
     }
 
     #[test]
@@ -146,25 +139,25 @@ mod tests {
                 address: String::from(""),
             },
         ];
-        let state = AppState::from_probes(config);
+        let state = AppState::from_probes(config.clone());
         let mut app = App::new("Probe", state);
 
         // set probes per tab manually
-        app.tabs.probes_per_tab = 2;
-        assert_eq!(app.state.selected_probe().name, String::from("0"));
+        app.tabs.recalculate_layout(config.len(), 2);
+        assert_eq!(app.selected_probe().name, String::from("0"));
 
         app.on_down();
-        assert_eq!(app.state.selected_probe().name, String::from("1"));
+        assert_eq!(app.selected_probe().name, String::from("1"));
 
         // already on bottom probe, shouldn't do anything
         app.on_down();
-        assert_eq!(app.state.selected_probe().name, String::from("1"));
+        assert_eq!(app.selected_probe().name, String::from("1"));
 
         app.on_up();
-        assert_eq!(app.state.selected_probe().name, String::from("0"));
+        assert_eq!(app.selected_probe().name, String::from("0"));
 
         // already on top probe, shouldn't do anything
         app.on_up();
-        assert_eq!(app.state.selected_probe().name, String::from("0"));
+        assert_eq!(app.selected_probe().name, String::from("0"));
     }
 }
