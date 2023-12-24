@@ -1,5 +1,5 @@
 use crate::probe::app::App;
-use crate::probe::state::ProbeState;
+use crate::probe::state::Probe;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
@@ -33,6 +33,8 @@ pub fn draw_list(f: &mut Frame, app: &mut App) {
     let num_probes = app.state.probes.len() as u16;
     let probes_per_tab: u16 = (f.size().height - 3) / 5;
     let num_tabs = ((num_probes as f64 / probes_per_tab as f64).ceil()) as u16;
+    app.tabs.num_tabs = num_tabs as usize;
+    app.tabs.probes_per_tab = probes_per_tab as usize;
     let titles: Vec<Line> = (0..num_tabs)
         .map(|t| {
             Line::from(Span::styled(
@@ -41,12 +43,10 @@ pub fn draw_list(f: &mut Frame, app: &mut App) {
             ))
         })
         .collect();
-    app.tabs.num = num_tabs as usize;
-    app.tabs.probe_num = probes_per_tab as usize;
     let tabs = Tabs::new(titles)
         .block(Block::default().borders(Borders::ALL).title(app.title))
         .highlight_style(Style::default().fg(Color::Blue))
-        .select(app.tabs.index);
+        .select(app.tabs.selected_tab);
 
     let chunks = Layout::default()
         .constraints(
@@ -97,7 +97,7 @@ fn draw_tab(f: &mut Frame, app: &App, area: Rect) {
     });
 }
 
-fn draw_probe(f: &mut Frame, probe: &ProbeState, area: Rect) {
+fn draw_probe(f: &mut Frame, probe: &Probe, area: Rect) {
     // split the area in two: left for the table, right for the histogram
     let chunks = Layout::default()
         .direction(Direction::Horizontal)

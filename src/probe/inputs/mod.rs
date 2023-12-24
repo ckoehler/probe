@@ -1,5 +1,5 @@
 mod zmq;
-use crate::probe::config::Probe;
+use crate::probe::config::ProbeConfig;
 use crate::probe::inputs::zmq::ZMQInput;
 use std::sync::mpsc;
 use std::thread;
@@ -13,7 +13,7 @@ pub struct Inputs {
 }
 
 impl Inputs {
-    pub fn with_probes(probes: Vec<Probe>) -> Inputs {
+    pub fn with_probes(probes: Vec<ProbeConfig>) -> Inputs {
         let (tx, rx) = mpsc::channel();
 
         probes.iter().for_each(|p| {

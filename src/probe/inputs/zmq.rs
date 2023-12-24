@@ -1,4 +1,4 @@
-use crate::probe::config::Probe;
+use crate::probe::config::ProbeConfig;
 use std::str;
 
 pub struct ZMQInput {
@@ -7,7 +7,7 @@ pub struct ZMQInput {
 }
 
 impl ZMQInput {
-    pub fn from_probe(probe: &Probe) -> ZMQInput {
+    pub fn from_probe(probe: &ProbeConfig) -> ZMQInput {
         let ctx = zmq::Context::new();
         let socket = ctx.socket(zmq::SUB).unwrap();
         socket.connect(&probe.address).unwrap();
