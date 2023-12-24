@@ -16,11 +16,11 @@ pub fn draw(f: &mut Frame, app: &mut App) {
     }
 }
 pub fn draw_detail(f: &mut Frame, app: &mut App) {
-    let text = app.state.selected_probe().messages();
+    let text = app.selected_probe().messages();
     let p = Paragraph::new(text)
         .block(
             Block::default()
-                .title(app.state.selected_probe().name)
+                .title(app.selected_probe().name)
                 .borders(Borders::ALL),
         )
         .style(Style::default().fg(Color::White).bg(Color::Black))
@@ -30,12 +30,10 @@ pub fn draw_detail(f: &mut Frame, app: &mut App) {
 }
 
 pub fn draw_list(f: &mut Frame, app: &mut App) {
-    let num_probes = app.state.probes.len() as u16;
-    let probes_per_tab: u16 = (f.size().height - 3) / 5;
-    let num_tabs = ((num_probes as f64 / probes_per_tab as f64).ceil()) as u16;
-    app.tabs.num_tabs = num_tabs as usize;
-    app.tabs.probes_per_tab = probes_per_tab as usize;
-    let titles: Vec<Line> = (0..num_tabs)
+    let num_probes = app.state.probes.len();
+    let probes_per_tab = (f.size().height as usize - 3) / 5;
+    app.tabs.recalculate_layout(num_probes, probes_per_tab);
+    let titles: Vec<Line> = (0..app.tabs.num_tabs)
         .map(|t| {
             Line::from(Span::styled(
                 format!("Page {}", t + 1),
@@ -83,7 +81,7 @@ fn draw_tab(f: &mut Frame, app: &App, area: Rect) {
 
     // for each probe, draw it in a chunk
     probes.iter().enumerate().for_each(|(i, p)| {
-        let style = if i == app.state.selected_probe {
+        let style = if i == app.tabs.selected_probe {
             Style::default().fg(Color::Blue)
         } else {
             Style::default().fg(Color::White)
