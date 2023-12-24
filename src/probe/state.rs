@@ -1,43 +1,46 @@
-use crate::probe::config;
+// use crate::probe::config;
 use regex::Regex;
 use std::cmp;
 use std::collections::VecDeque;
 
+use super::config::ProbeConfig;
+
 pub struct TabsState {
-    pub num: usize,
-    pub probe_num: usize,
-    pub index: usize,
+    pub num_tabs: usize,
+    pub probes_per_tab: usize,
+    pub selected_tab: usize,
 }
 
 impl TabsState {
-    pub fn new() -> TabsState {
+    pub fn new(num_probes: usize, probes_per_tab: usize) -> TabsState {
+        let num_tabs = ((num_probes as f64 / probes_per_tab as f64).ceil()) as usize;
         TabsState {
-            num: 1,
-            probe_num: 0,
-            index: 0,
+            num_tabs,
+            probes_per_tab,
+            selected_tab: 0,
         }
     }
     pub fn next(&mut self) {
-        self.index = (self.index + 1) % self.num;
+        self.selected_tab = (self.selected_tab + 1) % self.num_tabs;
     }
 
     pub fn previous(&mut self) {
-        if self.index > 0 {
-            self.index -= 1;
+        if self.selected_tab > 0 {
+            self.selected_tab -= 1;
         } else {
-            self.index = self.num - 1;
+            self.selected_tab = self.num_tabs - 1;
         }
     }
 }
 
 #[derive(Debug)]
 pub struct AppState {
-    pub probes: Vec<ProbeState>,
+    pub probes: Vec<Probe>,
     pub selected_probe: usize,
     pub detail_view: bool,
 }
 #[derive(Clone, Debug)]
-pub struct ProbeState {
+pub struct Probe {
     pub name: String,
     pub filter: String,
     pub count: u32,
@@ -47,24 +50,24 @@ pub struct ProbeState {
 }
 
 impl AppState {
-    pub fn from_probes(p: Vec<config::Probe>) -> AppState {
+    pub fn from_probes(p: Vec<ProbeConfig>) -> AppState {
         AppState {
-            probes: p.iter().map(|i| ProbeState::from(i.clone())).collect(),
+            probes: p.iter().map(|i| Probe::from(i.clone())).collect(),
             selected_probe: 0,
             detail_view: false,
         }
     }
-    pub fn selected_probe(&self) -> ProbeState {
+    pub fn selected_probe(&self) -> Probe {
         self.probes[self.selected_probe].clone()
     }
 
-    pub fn probes_for_tab(&self, index: usize, num: usize) -> Vec<ProbeState> {
+    pub fn probes_for_tab(&self, index: usize, num: usize) -> Vec<Probe> {
         let upper = cmp::min(index * num + num, self.probes.len());
         self.probes[index * num..upper].to_vec()
     }
 }
 
-impl ProbeState {
+impl Probe {
     pub fn process_message(&mut self, msg: &String) {
         if !self.filter.is_empty() {
             let re = Regex::new(&self.filter).unwrap();
@@ -103,9 +106,9 @@ impl ProbeState {
     }
 }
 
-impl From<config::Probe> for ProbeState {
-    fn from(item: config::Probe) -> Self {
-        ProbeState {
+impl From<ProbeConfig> for Probe {
+    fn from(item: ProbeConfig) -> Self {
+        Probe {
             name: item.name,
             filter: item.filter.unwrap_or(".*".to_string()),
             count: 0,
@@ -113,5 +116,17 @@ impl From<config::Probe> for ProbeState {
             messages: VecDeque::with_capacity(60),
             ring: VecDeque::with_capacity(60),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create_tabstate() {
+        let num_probes = 3;
+        let probes_per_tab = 1;
+        let _ = TabState::new(num_probes, probes_per_tab);
     }
 }

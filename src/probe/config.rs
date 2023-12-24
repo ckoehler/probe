@@ -16,10 +16,10 @@ pub struct Cli {
 
 #[derive(Debug, Deserialize)]
 pub struct Probes {
-    pub probes: Vec<Probe>,
+    pub probes: Vec<ProbeConfig>,
 }
 #[derive(Clone, Debug, Deserialize)]
-pub struct Probe {
+pub struct ProbeConfig {
     pub name: String,
     pub filter: Option<String>,
     pub address: String,
@@ -37,7 +37,7 @@ impl Probes {
         );
     }
 }
-impl Probe {
+impl ProbeConfig {
     fn validate(&self) {
         // make sure Filter is a valid regex
         Regex::new(self.filter.as_ref().unwrap_or(&".*".to_string())).unwrap();
