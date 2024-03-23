@@ -53,7 +53,7 @@ impl TabsState {
     }
 
     pub fn next_probe(&mut self) {
-        if self.selected_probe < self.probes_on_selected_page() - 1 {
+        if self.selected_probe < self.probes_on_selected_page().saturating_sub(1) {
             self.selected_probe += 1;
         }
     }
@@ -65,6 +65,11 @@ impl TabsState {
     }
 
     fn probes_on_selected_page(&self) -> usize {
+        // if we only have 1 page, return that
+        if self.num_probes <= self.probes_per_tab {
+            return self.num_probes;
+        }
+
         // all pages but the last
         if self.selected_tab < self.num_tabs - 1 {
             self.probes_per_tab
@@ -244,7 +249,7 @@ mod tests {
     }
 
     #[test]
-    fn probes_on_selected_page() {
+    fn probes_on_selected_page_1() {
         let num_probes = 3;
         let probes_per_tab = 2;
         let mut state = TabsState::new(num_probes);
@@ -254,6 +259,16 @@ mod tests {
         // next page, where there's only one probe
         state.next();
         assert_eq!(state.probes_on_selected_page(), 1);
+    }
+
+    // only one page with all the probes
+    #[test]
+    fn probes_on_selected_page_2() {
+        let num_probes = 3;
+        let probes_per_tab = 3;
+        let mut state = TabsState::new(num_probes);
+        state.recalculate_layout(num_probes, probes_per_tab);
+        assert_eq!(state.probes_on_selected_page(), 3);
     }
 
     #[test]

@@ -111,8 +111,10 @@ mod tests {
         let state = AppState::from_probes(config.clone());
         let mut app = App::new("Probe", state);
 
-        // TODO: make this more robust; panics if not set
+        // set layout to only have one tab
         app.tabs.recalculate_layout(config.len(), 1);
+
+        // check it's the first
         assert_eq!(app.selected_probe().name, String::from("0"));
 
         // there's only one probe, so this should do nothing
