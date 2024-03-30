@@ -36,7 +36,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     // set up events and app
     let events = Events::with_config(Config {
         tick_rate: Duration::from_millis(cli.tick_rate),
-        ..Config::default()
     });
     let appstate = AppState::from_probes(probes.probes);
     let app = App::new("Probe", appstate);

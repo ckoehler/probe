@@ -1,5 +1,4 @@
 use crossterm::event::read;
-use crossterm::event::KeyCode;
 use crossterm::event::KeyEvent;
 use std::sync::mpsc;
 use std::thread;
@@ -18,14 +17,12 @@ pub struct Events {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Config {
-    pub exit_key: KeyCode,
     pub tick_rate: Duration,
 }
 
 impl Default for Config {
     fn default() -> Config {
         Config {
-            exit_key: KeyCode::Char('q'),
             tick_rate: Duration::from_millis(250),
         }
     }
@@ -36,15 +33,10 @@ impl Events {
         let (tx, rx) = mpsc::channel();
         {
             let tx = tx.clone();
-            thread::spawn(move || {
-                loop {
-                    if let Ok(crossterm::event::Event::Key(key)) = read() {
-                        if let Err(err) = tx.send(Event::Input(key)) {
-                            eprintln!("{}", err);
-                        }
-                        // if key == config.exit_key.into() {
-                        //     return;
-                        // }
+            thread::spawn(move || loop {
+                if let Ok(crossterm::event::Event::Key(key)) = read() {
+                    if let Err(err) = tx.send(Event::Input(key)) {
+                        eprintln!("{}", err);
                     }
                 }
             });
