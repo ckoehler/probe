@@ -1,4 +1,5 @@
 use color_eyre::eyre::Result;
+use tracing::info;
 use tracing_error::ErrorLayer;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{self, layer::SubscriberExt, Layer};
@@ -18,18 +19,18 @@ use crossterm::{
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::fs;
 use std::sync::{Arc, Mutex};
-use std::thread;
 use std::{error::Error, io, time::Duration};
 
-fn main() -> Result<(), Box<dyn Error>> {
-    // get logging macros
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    // set up logging
     initialize_logging()?;
+
     // get config
     let cli: Cli = argh::from_env();
     let config = fs::read_to_string(cli.config).expect("Something went wrong reading the file");
     let probes: Probes = toml::from_str(&config).unwrap();
     probes.validate();
-    // println!("{:?}", probes);
 
     // set up terminal
     enable_raw_mode()?;
@@ -37,10 +38,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(CrosstermBackend::new(io::stdout()))?;
 
     // setup inputs
-    let inputs = Inputs::with_probes(probes.probes.clone());
+    let mut inputs = Inputs::with_probes(probes.probes.clone());
 
     // set up events and app
-    let events = Events::with_config(Config {
+    let mut events = Events::with_config(Config {
         tick_rate: Duration::from_millis(cli.tick_rate),
     });
     let appstate = AppState::from_probes(probes.probes);
@@ -49,15 +50,16 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // input loop
     let tapp = Arc::clone(&app);
-    thread::spawn(move || loop {
-        let msg = inputs.next();
-        {
-            let msg = msg.unwrap();
-            let mut app = tapp.lock().unwrap();
-            app.process_message_for_stream(msg.0, msg.1);
+    tokio::spawn(async move {
+        loop {
+            let msg = inputs.next();
+            {
+                let msg = msg.await.unwrap();
+                let mut app = tapp.lock().unwrap();
+                app.process_message_for_stream(msg.0, msg.1);
+            }
         }
     });
-
     // event loop
     loop {
         {
@@ -65,8 +67,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             terminal.draw(|f| ui::draw(f, &mut app))?;
         }
 
-        match events.next()? {
-            Event::Input(key) => match key.code {
+        match events.next().await {
+            Some(Event::Input(key)) => match key.code {
                 KeyCode::Char(c) => {
                     let mut app = app.lock().unwrap();
                     app.on_key(c);
@@ -93,11 +95,14 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
                 _ => {}
             },
-            Event::Tick => {
+            Some(Event::Tick) => {
+                info!("got tick");
                 let mut app = app.lock().unwrap();
                 app.on_tick();
             }
+            None => {}
         }
+
         let app = app.lock().unwrap();
         if app.should_quit {
             io::stdout().execute(LeaveAlternateScreen)?;
@@ -109,7 +114,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn initialize_logging() -> Result<()> {
+#[cfg(not(feature = "console"))]
+fn initialize_logging() -> Result<()> {
     let log_file = std::fs::File::create("./probe.log")?;
     //std::env::set_var(
     //    "RUST_LOG",
@@ -124,9 +130,38 @@ pub fn initialize_logging() -> Result<()> {
         .with_target(false)
         .with_ansi(false)
         .with_filter(tracing_subscriber::filter::EnvFilter::from_default_env());
+
     tracing_subscriber::registry()
         .with(file_subscriber)
         .with(ErrorLayer::default())
         .init();
+
+    Ok(())
+}
+
+#[cfg(feature = "console")]
+fn initialize_logging() -> Result<()> {
+    let log_file = std::fs::File::create("./probe.log")?;
+    //std::env::set_var(
+    //    "RUST_LOG",
+    //    std::env::var("RUST_LOG")
+    //        .or_else(|_| std::env::var("PROBE_LOGLEVEL"))
+    //        .unwrap_or_else(|_| format!("{}=info", env!("CARGO_CRATE_NAME"))),
+    //);
+    let file_subscriber = tracing_subscriber::fmt::layer()
+        .with_file(true)
+        .with_line_number(true)
+        .with_writer(log_file)
+        .with_target(false)
+        .with_ansi(false)
+        .with_filter(tracing_subscriber::filter::EnvFilter::from_default_env());
+    let console_subscriber = console_subscriber::spawn();
+
+    tracing_subscriber::registry()
+        .with(file_subscriber)
+        .with(console_subscriber)
+        .with(ErrorLayer::default())
+        .init();
+
     Ok(())
 }

@@ -1,17 +1,19 @@
 use crate::probe::config::ProbeConfig;
+use async_zmq::StreamExt;
 use std::str;
 
 pub struct ZMQInput {
     pub name: String,
-    socket: zmq::Socket,
+    socket: async_zmq::Subscribe,
 }
 
 impl ZMQInput {
     pub fn from_probe(probe: &ProbeConfig) -> ZMQInput {
-        let ctx = zmq::Context::new();
-        let socket = ctx.socket(zmq::SUB).unwrap();
-        socket.connect(&probe.address).unwrap();
-        let subscription = String::new().into_bytes();
+        let socket = async_zmq::subscribe(&probe.address)
+            .unwrap()
+            .connect()
+            .unwrap();
+        let subscription = String::new();
         socket.set_subscribe(&subscription).unwrap();
         ZMQInput {
             name: probe.name.clone(),
@@ -19,12 +21,14 @@ impl ZMQInput {
         }
     }
 
-    pub fn get(&self) -> String {
+    pub async fn get(&mut self) -> String {
         self.socket
-            .recv_multipart(0)
+            .next()
+            .await
+            .unwrap()
             .unwrap()
             .iter()
-            .map(|v| str::from_utf8(v).unwrap_or(""))
+            .map(|v| v.as_str().unwrap())
             .collect::<Vec<&str>>()
             .join("\n")
     }
