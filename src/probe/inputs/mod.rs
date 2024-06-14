@@ -1,30 +1,30 @@
 mod zmq;
 use crate::probe::config::ProbeConfig;
 use crate::probe::inputs::zmq::ZMQInput;
-use std::sync::mpsc;
-use std::thread;
+use tokio::sync::mpsc;
 
 pub type Message = (String, String);
 
-/// A small event handler that wrap termion input and tick events. Each event
-/// type is handled in its own thread and returned to a common `Receiver`
+/// A small event handler that wraps input and tick events. Each event
+/// type is handled in its own task and returned to a common `Receiver`
 pub struct Inputs {
     rx: mpsc::Receiver<Message>,
 }
 
 impl Inputs {
     pub fn with_probes(probes: Vec<ProbeConfig>) -> Inputs {
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = mpsc::channel(10);
 
         probes.iter().for_each(|p| {
             let p = p.clone();
             let tx = tx.clone();
-            thread::spawn(move || {
-                let z = ZMQInput::from_probe(&p);
+            tokio::spawn(async move {
+                let mut z = ZMQInput::from_probe(&p);
                 loop {
-                    let msg = z.get();
+                    // this is blocking!!
+                    let msg = z.get().await;
                     let name = z.name();
-                    if tx.send((name, msg)).is_err() {
+                    if tx.send((name, msg)).await.is_err() {
                         break;
                     }
                 }
@@ -33,7 +33,7 @@ impl Inputs {
         Inputs { rx }
     }
 
-    pub fn next(&self) -> Result<Message, mpsc::RecvError> {
-        self.rx.recv()
+    pub async fn next(&mut self) -> Option<Message> {
+        self.rx.recv().await
     }
 }

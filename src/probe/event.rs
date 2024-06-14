@@ -1,17 +1,18 @@
-use crossterm::event::read;
+use tokio_stream::StreamExt;
+
 use crossterm::event::KeyEvent;
-use std::sync::mpsc;
-use std::thread;
 use std::time::Duration;
-use tracing::info;
+use tokio::sync::mpsc;
+use tracing::error;
 
 pub enum Event<I> {
     Input(I),
     Tick,
 }
 
-/// A small event handler that wrap termion input and tick events. Each event
-/// type is handled in its own thread and returned to a common `Receiver`
+/// A small event handler that wraps keyboard input and tick events. Each event
+/// type is handled in its own task and returned to a common `Receiver`
+#[derive(Debug)]
 pub struct Events {
     rx: mpsc::Receiver<Event<KeyEvent>>,
 }
@@ -31,31 +32,36 @@ impl Default for Config {
 
 impl Events {
     pub fn with_config(config: Config) -> Events {
-        let (tx, rx) = mpsc::channel();
+        let (tx, rx) = mpsc::channel(10);
         {
             let tx = tx.clone();
-            thread::spawn(move || loop {
-                if let Ok(crossterm::event::Event::Key(key)) = read() {
-                    if let Err(err) = tx.send(Event::Input(key)) {
-                        eprintln!("{}", err);
+            let mut reader = crossterm::event::EventStream::new();
+            tokio::spawn(async move {
+                loop {
+                    if let Ok(crossterm::event::Event::Key(key)) = reader.next().await.unwrap() {
+                        if let Err(err) = tx.send(Event::Input(key)).await {
+                            error!("{}", err);
+                        }
                     }
                 }
             });
         }
         {
             let tx = tx.clone();
-            thread::spawn(move || loop {
-                if tx.send(Event::Tick).is_err() {
-                    break;
+            tokio::spawn(async move {
+                let mut interval = tokio::time::interval(config.tick_rate);
+                loop {
+                    if tx.send(Event::Tick).await.is_err() {
+                        break;
+                    }
+                    interval.tick().await;
                 }
-                info!("Tick");
-                thread::sleep(config.tick_rate);
             })
         };
         Events { rx }
     }
 
-    pub fn next(&self) -> Result<Event<KeyEvent>, mpsc::RecvError> {
-        self.rx.recv()
+    pub async fn next(&mut self) -> Option<Event<KeyEvent>> {
+        self.rx.recv().await
     }
 }
