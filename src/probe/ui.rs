@@ -26,12 +26,12 @@ pub fn draw_detail(f: &mut Frame, app: &mut App) {
         .style(Style::default().fg(Color::White).bg(Color::Black))
         .wrap(Wrap { trim: true });
 
-    f.render_widget(p, f.size());
+    f.render_widget(p, f.area());
 }
 
 pub fn draw_list(f: &mut Frame, app: &mut App) {
     let num_probes = app.state.probes.len();
-    let probes_per_tab = (f.size().height as usize - 3) / 5;
+    let probes_per_tab = (f.area().height as usize - 3) / 5;
     app.tabs.recalculate_layout(num_probes, probes_per_tab);
     let titles: Vec<Line> = (0..app.tabs.num_tabs)
         .map(|t| {
@@ -55,7 +55,7 @@ pub fn draw_list(f: &mut Frame, app: &mut App) {
             ]
             .as_ref(),
         )
-        .split(f.size());
+        .split(f.area());
     f.render_widget(tabs, chunks[0]);
     draw_tab(f, app, chunks[1]);
 
