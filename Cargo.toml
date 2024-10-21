@@ -8,7 +8,7 @@ repository = "https://github.com/ckoehler/probe"
 publish = false
 
 [dependencies]
-ratatui = "0.28"
+ratatui = "0.29"
 crossterm = "0.28"
 argh="0.1"
 regex = "1"
