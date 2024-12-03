@@ -16,7 +16,7 @@ itertools = "0.13"
 rand = "0.8"
 toml = "0.8"
 serde = { version = "1.0", features = ["derive"] }
-tokio = "1.41"
+tokio = "1.42"
 zmq = "0.10"
 
 # The profile that 'cargo dist' will build with
