@@ -6,6 +6,7 @@ use crate::probe::event::{Config, Event, Events};
 use crate::probe::inputs::Inputs;
 use crate::probe::state::AppState;
 use crate::probe::ui;
+use cli_log::*;
 use crossterm::{
     event::KeyCode,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
@@ -18,6 +19,8 @@ use std::thread;
 use std::{error::Error, io, time::Duration};
 
 fn main() -> Result<(), Box<dyn Error>> {
+    // get logging macros
+    init_cli_log!();
     // get config
     let cli: Cli = argh::from_env();
     let config = fs::read_to_string(cli.config).expect("Something went wrong reading the file");
