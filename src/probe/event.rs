@@ -1,3 +1,4 @@
+use cli_log::*;
 use crossterm::event::read;
 use crossterm::event::KeyEvent;
 use std::sync::mpsc;
@@ -47,6 +48,7 @@ impl Events {
                 if tx.send(Event::Tick).is_err() {
                     break;
                 }
+                info!("Tick");
                 thread::sleep(config.tick_rate);
             })
         };
