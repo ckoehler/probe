@@ -1,20 +1,22 @@
 use crate::probe::config::ProbeConfig;
-use async_zmq::StreamExt;
-use std::str;
+use zeromq::Socket;
+use zeromq::SocketRecv;
+use zeromq::SubSocket;
 
 pub struct ZMQInput {
     pub name: String,
-    socket: async_zmq::Subscribe,
+    socket: SubSocket,
 }
 
 impl ZMQInput {
-    pub fn from_probe(probe: &ProbeConfig) -> ZMQInput {
-        let socket = async_zmq::subscribe(&probe.address)
-            .unwrap()
-            .connect()
-            .unwrap();
-        let subscription = String::new();
-        socket.set_subscribe(&subscription).unwrap();
+    pub async fn from_probe(probe: &ProbeConfig) -> ZMQInput {
+        let mut socket = zeromq::SubSocket::new();
+        socket
+            .connect(&probe.address)
+            .await
+            .expect("Failed to connect");
+
+        socket.subscribe("").await.unwrap();
         ZMQInput {
             name: probe.name.clone(),
             socket,
@@ -22,14 +24,10 @@ impl ZMQInput {
     }
 
     pub async fn get(&mut self) -> String {
-        self.socket
-            .next()
-            .await
-            .unwrap()
-            .unwrap()
-            .iter()
-            .map(|v| v.as_str().unwrap())
-            .collect::<Vec<&str>>()
+        let data = self.socket.recv().await.unwrap();
+        data.iter()
+            .map(|b| String::from_utf8_lossy(b).into_owned())
+            .collect::<Vec<String>>()
             .join("\n")
     }
 
