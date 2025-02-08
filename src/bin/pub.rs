@@ -1,12 +1,12 @@
 use rand::Rng;
+use std::error::Error;
 use std::time::Duration;
+use zeromq::{Socket, SocketSend, ZmqMessage};
 
-fn main() {
-    let ctx = zmq::Context::new();
-
-    let socket = ctx.socket(zmq::PUB).unwrap();
-    socket.bind("tcp://127.0.0.1:5556").unwrap();
-    socket.send("hello world!", 0).unwrap();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    let mut socket = zeromq::PubSocket::new();
+    socket.bind("tcp://127.0.0.1:5556").await?;
 
     let mut rng = rand::rng();
     println!("Start server");
@@ -17,9 +17,11 @@ fn main() {
         let relhumidity = rng.random_range(10..=60);
         let topic = "UNIT".to_string();
         let msg = format!("{zipcode} {temperature} {relhumidity}");
-        let msg = [topic, msg];
-        socket.send_multipart(msg.iter(), 0).unwrap();
+        let mut m: ZmqMessage = ZmqMessage::from(topic);
+        m.push_back(msg.into());
+
+        socket.send(m).await?;
         let delay = rng.random_range(25..=2200);
-        std::thread::sleep(Duration::from_millis(delay));
+        tokio::time::sleep(Duration::from_millis(delay)).await;
     }
 }

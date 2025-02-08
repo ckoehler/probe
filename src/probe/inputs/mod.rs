@@ -19,7 +19,7 @@ impl Inputs {
             let p = p.clone();
             let tx = tx.clone();
             tokio::spawn(async move {
-                let mut z = ZMQInput::from_probe(&p);
+                let mut z = ZMQInput::from_probe(&p).await;
                 loop {
                     // this is blocking!!
                     let msg = z.get().await;
