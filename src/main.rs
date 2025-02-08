@@ -1,3 +1,7 @@
+use color_eyre::eyre::Result;
+use tracing_error::ErrorLayer;
+use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::{self, layer::SubscriberExt, Layer};
 mod probe;
 
 use crate::probe::app::App;
@@ -6,7 +10,6 @@ use crate::probe::event::{Config, Event, Events};
 use crate::probe::inputs::Inputs;
 use crate::probe::state::AppState;
 use crate::probe::ui;
-use cli_log::*;
 use crossterm::{
     event::KeyCode,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
@@ -20,7 +23,7 @@ use std::{error::Error, io, time::Duration};
 
 fn main() -> Result<(), Box<dyn Error>> {
     // get logging macros
-    init_cli_log!();
+    initialize_logging()?;
     // get config
     let cli: Cli = argh::from_env();
     let config = fs::read_to_string(cli.config).expect("Something went wrong reading the file");
@@ -103,5 +106,27 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
+    Ok(())
+}
+
+pub fn initialize_logging() -> Result<()> {
+    let log_file = std::fs::File::create("./probe.log")?;
+    //std::env::set_var(
+    //    "RUST_LOG",
+    //    std::env::var("RUST_LOG")
+    //        .or_else(|_| std::env::var("PROBE_LOGLEVEL"))
+    //        .unwrap_or_else(|_| format!("{}=info", env!("CARGO_CRATE_NAME"))),
+    //);
+    let file_subscriber = tracing_subscriber::fmt::layer()
+        .with_file(true)
+        .with_line_number(true)
+        .with_writer(log_file)
+        .with_target(false)
+        .with_ansi(false)
+        .with_filter(tracing_subscriber::filter::EnvFilter::from_default_env());
+    tracing_subscriber::registry()
+        .with(file_subscriber)
+        .with(ErrorLayer::default())
+        .init();
     Ok(())
 }

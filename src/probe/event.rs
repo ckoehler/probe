@@ -1,9 +1,9 @@
-use cli_log::*;
 use crossterm::event::read;
 use crossterm::event::KeyEvent;
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
+use tracing::info;
 
 pub enum Event<I> {
     Input(I),
