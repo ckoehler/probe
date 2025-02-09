@@ -44,6 +44,11 @@ console = ["dep:console-subscriber"]
 inherits = "release"
 lto = "thin"
 
+[profile.release]
+lto = true
+codegen-units = 1
+
+
 [workspace.lints.clippy]
 pedantic = { level = "deny", priority = -1 }
 cast_precision_loss = "allow"
