@@ -53,6 +53,7 @@ install-updater = false
 [workspace.lints.clippy]
 pedantic = { level = "deny", priority = -1 }
 cast_precision_loss = "allow"
+unwrap_used = "deny"
 
 [lints]
 workspace = true

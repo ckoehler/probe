@@ -38,7 +38,9 @@ impl Events {
             let mut reader = crossterm::event::EventStream::new();
             tokio::spawn(async move {
                 loop {
-                    if let Ok(crossterm::event::Event::Key(key)) = reader.next().await.unwrap() {
+                    if let Ok(crossterm::event::Event::Key(key)) =
+                        reader.next().await.expect("Failed to read terminal event")
+                    {
                         if let Err(err) = tx.send(Event::Input(key)).await {
                             error!("{}", err);
                         }

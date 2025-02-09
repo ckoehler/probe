@@ -40,6 +40,6 @@ impl Probes {
 impl ProbeConfig {
     fn validate(&self) {
         // make sure Filter is a valid regex
-        Regex::new(self.filter.as_ref().unwrap_or(&".*".to_string())).unwrap();
+        Regex::new(self.filter.as_ref().unwrap_or(&".*".to_string())).expect("Invalid regex");
     }
 }

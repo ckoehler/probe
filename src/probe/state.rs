@@ -121,7 +121,7 @@ impl Probe {
         if self.filter.is_empty() {
             self.update_message_buffer(msg);
         } else {
-            let re = Regex::new(&self.filter).unwrap();
+            let re = Regex::new(&self.filter).expect("Failed to parse regex");
             if re.is_match(msg) {
                 self.update_message_buffer(msg);
                 self.count += 1;
