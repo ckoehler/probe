@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // get config
     let cli: Cli = argh::from_env();
     let config = fs::read_to_string(cli.config).expect("Something went wrong reading the file");
-    let probes: Probes = toml::from_str(&config).unwrap();
+    let probes: Probes = toml::from_str(&config).expect("Couldn't parse config file.");
     probes.validate();
 
     // set up terminal
@@ -52,10 +52,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let tapp = Arc::clone(&app);
     tokio::spawn(async move {
         loop {
-            let msg = inputs.next();
+            let msg = inputs.next().await.expect("Failed to get next input.");
             {
-                let msg = msg.await.unwrap();
-                let mut app = tapp.lock().unwrap();
+                let mut app = tapp.lock().expect("Failed to lock Mutex");
                 app.process_message_for_stream(&msg.0, &msg.1);
             }
         }
@@ -63,47 +62,47 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // event loop
     loop {
         {
-            let mut app = app.lock().unwrap();
+            let mut app = app.lock().expect("Failed to lock Mutex");
             terminal.draw(|f| ui::draw(f, &mut app))?;
         }
 
         match events.next().await {
             Some(Event::Input(key)) => match key.code {
                 KeyCode::Char(c) => {
-                    let mut app = app.lock().unwrap();
+                    let mut app = app.lock().expect("Failed to lock Mutex");
                     app.on_key(c);
                 }
                 KeyCode::Enter => {
-                    let mut app = app.lock().unwrap();
+                    let mut app = app.lock().expect("Failed to lock Mutex");
                     app.on_key('\n');
                 }
                 KeyCode::Up => {
-                    let mut app = app.lock().unwrap();
+                    let mut app = app.lock().expect("Failed to lock Mutex");
                     app.on_up();
                 }
                 KeyCode::Down => {
-                    let mut app = app.lock().unwrap();
+                    let mut app = app.lock().expect("Failed to lock Mutex");
                     app.on_down();
                 }
                 KeyCode::Left => {
-                    let mut app = app.lock().unwrap();
+                    let mut app = app.lock().expect("Failed to lock Mutex");
                     app.on_left();
                 }
                 KeyCode::Right => {
-                    let mut app = app.lock().unwrap();
+                    let mut app = app.lock().expect("Failed to lock Mutex");
                     app.on_right();
                 }
                 _ => {}
             },
             Some(Event::Tick) => {
                 info!("got tick");
-                let mut app = app.lock().unwrap();
+                let mut app = app.lock().expect("Failed to lock Mutex");
                 app.on_tick();
             }
             None => {}
         }
 
-        let app = app.lock().unwrap();
+        let app = app.lock().expect("Failed to lock Mutex");
         if app.should_quit {
             io::stdout().execute(LeaveAlternateScreen)?;
             disable_raw_mode()?;

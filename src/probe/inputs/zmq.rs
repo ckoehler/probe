@@ -16,7 +16,7 @@ impl ZMQInput {
             .await
             .expect("Failed to connect");
 
-        socket.subscribe("").await.unwrap();
+        socket.subscribe("").await.expect("Failed to subscribe");
         ZMQInput {
             name: probe.name.clone(),
             socket,
@@ -24,7 +24,7 @@ impl ZMQInput {
     }
 
     pub async fn get(&mut self) -> String {
-        let data = self.socket.recv().await.unwrap();
+        let data = self.socket.recv().await.expect("Receive failed");
         data.iter()
             .map(|b| String::from_utf8_lossy(b).into_owned())
             .collect::<Vec<String>>()
