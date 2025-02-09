@@ -74,9 +74,7 @@ fn draw_tab(f: &mut Frame, app: &App, area: Rect) {
     // create blocks for each probe
     let probes = app.probes_for_tab();
     let num_probes = probes.len();
-    let constraints: Vec<Constraint> = (0..num_probes + 1)
-        .map(|_c| Constraint::Length(5))
-        .collect();
+    let constraints: Vec<Constraint> = (0..=num_probes).map(|_c| Constraint::Length(5)).collect();
     let chunks = Layout::default().constraints(constraints).split(area);
 
     // for each probe, draw it in a chunk

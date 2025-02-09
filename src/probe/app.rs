@@ -75,12 +75,12 @@ impl<'a> App<'a> {
             .for_each(|p: &mut Probe| p.update_state());
     }
 
-    pub fn process_message_for_stream(&mut self, stream: String, msg: String) {
+    pub fn process_message_for_stream(&mut self, stream: &str, msg: &str) {
         self.state
             .probes
             .iter_mut()
             .filter(|p| p.name == stream)
-            .for_each(|p: &mut Probe| p.process_message(&msg));
+            .for_each(|p: &mut Probe| p.process_message(msg));
     }
 }
 
@@ -95,20 +95,20 @@ mod tests {
             ProbeConfig {
                 name: String::from("0"),
                 filter: None,
-                address: String::from(""),
+                address: String::new(),
             },
             ProbeConfig {
                 name: String::from("1"),
                 filter: None,
-                address: String::from(""),
+                address: String::new(),
             },
             ProbeConfig {
                 name: String::from("2"),
                 filter: None,
-                address: String::from(""),
+                address: String::new(),
             },
         ];
-        let state = AppState::from_probes(config.clone());
+        let state = AppState::from_probes(&config);
         let mut app = App::new("Probe", state);
 
         // set layout to only have one tab
@@ -128,20 +128,20 @@ mod tests {
             ProbeConfig {
                 name: String::from("0"),
                 filter: None,
-                address: String::from(""),
+                address: String::new(),
             },
             ProbeConfig {
                 name: String::from("1"),
                 filter: None,
-                address: String::from(""),
+                address: String::new(),
             },
             ProbeConfig {
                 name: String::from("2"),
                 filter: None,
-                address: String::from(""),
+                address: String::new(),
             },
         ];
-        let state = AppState::from_probes(config.clone());
+        let state = AppState::from_probes(&config);
         let mut app = App::new("Probe", state);
 
         // set probes per tab manually

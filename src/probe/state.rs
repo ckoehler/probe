@@ -25,6 +25,7 @@ impl TabsState {
         }
     }
     pub fn recalculate_layout(&mut self, num_probes: usize, probes_per_tab: usize) {
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
         let new_num_tabs = ((num_probes as f64 / probes_per_tab as f64).ceil()) as usize;
 
         // if we're changing the layout, likely because of a resize, also reset the currently
@@ -102,7 +103,7 @@ pub struct Probe {
 }
 
 impl AppState {
-    pub fn from_probes(p: Vec<ProbeConfig>) -> AppState {
+    pub fn from_probes(p: &[ProbeConfig]) -> AppState {
         AppState {
             probes: p.iter().map(|i| Probe::from(i.clone())).collect(),
             detail_view: false,
@@ -116,16 +117,16 @@ impl AppState {
 }
 
 impl Probe {
-    pub fn process_message(&mut self, msg: &String) {
-        if !self.filter.is_empty() {
+    pub fn process_message(&mut self, msg: &str) {
+        if self.filter.is_empty() {
+            self.update_message_buffer(msg);
+        } else {
             let re = Regex::new(&self.filter).unwrap();
             if re.is_match(msg) {
                 self.update_message_buffer(msg);
                 self.count += 1;
                 self.ring_buffer += 1;
             }
-        } else {
-            self.update_message_buffer(msg);
         }
     }
 
@@ -133,7 +134,7 @@ impl Probe {
         self.messages.clone().make_contiguous().to_vec().join("\n")
     }
 
-    pub fn update_message_buffer(&mut self, msg: &String) {
+    pub fn update_message_buffer(&mut self, msg: &str) {
         self.messages.push_front(msg.to_string());
         if self.messages.len() >= 60 {
             self.messages.pop_back();

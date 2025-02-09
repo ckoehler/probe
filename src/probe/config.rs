@@ -27,7 +27,7 @@ pub struct ProbeConfig {
 
 impl Probes {
     pub fn validate(&self) {
-        self.probes.iter().for_each(|p| p.validate());
+        self.probes.iter().for_each(ProbeConfig::validate);
 
         // make sure all probe names are unique
         let p: Vec<&String> = self.probes.iter().map(|p| &p.name).unique().collect();

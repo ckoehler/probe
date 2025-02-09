@@ -50,3 +50,10 @@ pr-run-mode = "plan"
 dist = true
 # Whether to install an updater program
 install-updater = false
+
+[workspace.lints.clippy]
+pedantic = { level = "deny", priority = -1 }
+cast_precision_loss = "allow"
+
+[lints]
+workspace = true
