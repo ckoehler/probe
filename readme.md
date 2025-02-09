@@ -1,8 +1,7 @@
-# Probe
+# Probe  [![Continuous Integration](https://github.com/ckoehler/Probe/actions/workflows/ci.yml/badge.svg)](https://github.com/ckoehler/Probe/actions/workflows/ci.yml) [![Continuous Deployment](https://github.com/ckoehler/Probe/actions/workflows/cd.yaml/badge.svg)](https://github.com/ckoehler/Probe/actions/workflows/cd.yaml) [![Release](https://github.com/ckoehler/Probe/actions/workflows/release.yml/badge.svg)](https://github.com/ckoehler/Probe/actions/workflows/release.yml)
 
 Probe is a TUI ZMQ PUB/SUB monitor and debugger.
 
-[![Build status](https://github.com/ckoehler/probe/workflows/ci/badge.svg)](https://github.com/ckoehler/probe/actions)
 
 
 ![screenshot](assets/screen1.png)
