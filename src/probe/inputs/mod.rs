@@ -12,10 +12,10 @@ pub struct Inputs {
 }
 
 impl Inputs {
-    pub fn with_probes(probes: Vec<ProbeConfig>) -> Inputs {
+    pub fn with_probes(probes: &[ProbeConfig]) -> Inputs {
         let (tx, rx) = mpsc::channel(10);
 
-        probes.iter().for_each(|p| {
+        for p in probes {
             let p = p.clone();
             let tx = tx.clone();
             tokio::spawn(async move {
@@ -29,7 +29,7 @@ impl Inputs {
                     }
                 }
             });
-        });
+        }
         Inputs { rx }
     }
 

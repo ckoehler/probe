@@ -38,13 +38,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(CrosstermBackend::new(io::stdout()))?;
 
     // setup inputs
-    let mut inputs = Inputs::with_probes(probes.probes.clone());
+    let mut inputs = Inputs::with_probes(&probes.probes);
 
     // set up events and app
     let mut events = Events::with_config(Config {
         tick_rate: Duration::from_millis(cli.tick_rate),
     });
-    let appstate = AppState::from_probes(probes.probes);
+    let appstate = AppState::from_probes(&probes.probes);
     let app = App::new("Probe", appstate);
     let app = Arc::new(Mutex::new(app));
 
@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             {
                 let msg = msg.await.unwrap();
                 let mut app = tapp.lock().unwrap();
-                app.process_message_for_stream(msg.0, msg.1);
+                app.process_message_for_stream(&msg.0, &msg.1);
             }
         }
     });
@@ -116,52 +116,44 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 #[cfg(not(feature = "console"))]
 fn initialize_logging() -> Result<()> {
-    let log_file = std::fs::File::create("./probe.log")?;
-    //std::env::set_var(
-    //    "RUST_LOG",
-    //    std::env::var("RUST_LOG")
-    //        .or_else(|_| std::env::var("PROBE_LOGLEVEL"))
-    //        .unwrap_or_else(|_| format!("{}=info", env!("CARGO_CRATE_NAME"))),
-    //);
-    let file_subscriber = tracing_subscriber::fmt::layer()
-        .with_file(true)
-        .with_line_number(true)
-        .with_writer(log_file)
-        .with_target(false)
-        .with_ansi(false)
-        .with_filter(tracing_subscriber::filter::EnvFilter::from_default_env());
+    if std::env::var("RUST_LOG").is_ok() {
+        let log_file = std::fs::File::create("./probe.log")?;
+        let file_subscriber = tracing_subscriber::fmt::layer()
+            .with_file(true)
+            .with_line_number(true)
+            .with_writer(log_file)
+            .with_target(false)
+            .with_ansi(false)
+            .with_filter(tracing_subscriber::filter::EnvFilter::from_default_env());
 
-    tracing_subscriber::registry()
-        .with(file_subscriber)
-        .with(ErrorLayer::default())
-        .init();
+        tracing_subscriber::registry()
+            .with(file_subscriber)
+            .with(ErrorLayer::default())
+            .init();
+    }
 
     Ok(())
 }
 
 #[cfg(feature = "console")]
 fn initialize_logging() -> Result<()> {
-    let log_file = std::fs::File::create("./probe.log")?;
-    //std::env::set_var(
-    //    "RUST_LOG",
-    //    std::env::var("RUST_LOG")
-    //        .or_else(|_| std::env::var("PROBE_LOGLEVEL"))
-    //        .unwrap_or_else(|_| format!("{}=info", env!("CARGO_CRATE_NAME"))),
-    //);
-    let file_subscriber = tracing_subscriber::fmt::layer()
-        .with_file(true)
-        .with_line_number(true)
-        .with_writer(log_file)
-        .with_target(false)
-        .with_ansi(false)
-        .with_filter(tracing_subscriber::filter::EnvFilter::from_default_env());
-    let console_subscriber = console_subscriber::spawn();
+    if std::env::var("RUST_LOG").is_ok() {
+        let log_file = std::fs::File::create("./probe.log")?;
+        let file_subscriber = tracing_subscriber::fmt::layer()
+            .with_file(true)
+            .with_line_number(true)
+            .with_writer(log_file)
+            .with_target(false)
+            .with_ansi(false)
+            .with_filter(tracing_subscriber::filter::EnvFilter::from_default_env());
+        let console_subscriber = console_subscriber::spawn();
 
-    tracing_subscriber::registry()
-        .with(file_subscriber)
-        .with(console_subscriber)
-        .with(ErrorLayer::default())
-        .init();
+        tracing_subscriber::registry()
+            .with(file_subscriber)
+            .with(console_subscriber)
+            .with(ErrorLayer::default())
+            .init();
+    }
 
     Ok(())
 }

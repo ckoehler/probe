@@ -16,7 +16,7 @@ fn main() {
         let temperature = rng.random_range(-80..=135);
         let relhumidity = rng.random_range(10..=60);
         let topic = "UNIT".to_string();
-        let msg = format!("{} {} {}", zipcode, temperature, relhumidity);
+        let msg = format!("{zipcode} {temperature} {relhumidity}");
         let msg = [topic, msg];
         socket.send_multipart(msg.iter(), 0).unwrap();
         let delay = rng.random_range(25..=2200);
