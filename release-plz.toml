@@ -22,6 +22,3 @@ publish_allow_dirty = false
 
 # disable running `cargo-semver-checks`
 semver_check = false
-
-# don't publish to crates.io
-publish = false
