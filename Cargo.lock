@@ -1069,7 +1069,7 @@ dependencies = [
 
 [[package]]
 name = "probe-zmq"
-version = "0.3.4"
+version = "0.3.5"
 dependencies = [
  "argh",
  "color-eyre",
