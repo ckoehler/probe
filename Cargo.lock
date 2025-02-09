@@ -1068,7 +1068,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "probe"
+name = "probe-zmq"
 version = "0.2.2"
 dependencies = [
  "argh",
