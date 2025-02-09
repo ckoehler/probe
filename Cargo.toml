@@ -1,11 +1,11 @@
 [package]
-name = "probe"
+name = "probe-zmq"
 version = "0.2.2"
 authors = ["Christoph Koehler <christoph@zerodeviation.net>"]
 edition = "2021"
 license-file = "LICENSE-MIT"
 repository = "https://github.com/ckoehler/probe"
-publish = false
+publish = true
 
 [dependencies]
 ratatui = "0.29"
@@ -24,6 +24,10 @@ color-eyre = "0.6.3"
 zeromq = "0.4.1"
 tokio-stream = "0.1.17"
 console-subscriber = { version = "0.4.1", optional = true }
+
+[[bin]]
+name = "probe"
+path = "src/main.rs"
 
 [features]
 console = ["dep:console-subscriber"]
