@@ -1,6 +1,6 @@
 [package]
 name = "probe-zmq"
-version = "0.3.5"
+version = "0.3.6"
 authors = ["Christoph Koehler <christoph@zerodeviation.net>"]
 description = "Probe is a TUI ZMQ PUB/SUB monitor and debugger."
 edition = "2021"
