@@ -2,7 +2,7 @@ use color_eyre::eyre::Result;
 use tracing::info;
 use tracing_error::ErrorLayer;
 use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::{self, layer::SubscriberExt, Layer};
+use tracing_subscriber::{self, Layer, layer::SubscriberExt};
 mod probe;
 
 use crate::probe::app::App;
@@ -12,11 +12,11 @@ use crate::probe::inputs::Inputs;
 use crate::probe::state::AppState;
 use crate::probe::ui;
 use crossterm::{
-    event::KeyCode,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
+    event::KeyCode,
+    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
 };
-use ratatui::{backend::CrosstermBackend, Terminal};
+use ratatui::{Terminal, backend::CrosstermBackend};
 use std::fs;
 use std::sync::{Arc, Mutex};
 use std::{error::Error, io, time::Duration};
