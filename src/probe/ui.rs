@@ -1,11 +1,11 @@
 use crate::probe::app::App;
 use crate::probe::state::Probe;
 use ratatui::{
+    Frame,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Row, Sparkline, Table, Tabs, Wrap},
-    Frame,
 };
 
 pub fn draw(f: &mut Frame, app: &mut App) {
