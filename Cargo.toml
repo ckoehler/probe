@@ -9,12 +9,6 @@ repository = "https://github.com/ckoehler/probe"
 readme = "README.md"
 publish = true
 
-[package.metadata.wix]
-upgrade-guid = "C32EB457-F4E6-4626-B89F-8A6C93532A4B"
-path-guid = "D2B8B461-ED42-424C-8257-20A2BCF0FBB8"
-license = false
-eula = false
-
 [dependencies]
 ratatui = "0.29"
 crossterm = { version = "0.28", features = ["event-stream"] }
